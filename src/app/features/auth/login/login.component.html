@@ -1,0 +1,94 @@
+<div class="login-page">
+  <!-- Animated orb background -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="login-card animate-scale-in">
+
+    <!-- Logo -->
+    <div class="logo-area">
+      <div class="logo-icon">
+        <span class="material-symbols-rounded">auto_awesome</span>
+      </div>
+      <h1 class="logo-title gradient-text">Mantra</h1>
+      <p class="logo-subtitle">Your life, beautifully organised</p>
+    </div>
+
+    <!-- Error alert -->
+    @if (error()) {
+      <div class="alert alert-error animate-fade-in">
+        <span class="material-symbols-rounded">error</span>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <div class="input-wrapper" [class.input-error]="hasError('email', 'required') || hasError('email', 'email')">
+          <span class="input-icon material-symbols-rounded">mail</span>
+          <input
+            class="input-field input-with-icon"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+        </div>
+        @if (hasError('email', 'required')) {
+          <span class="field-error">Email is required</span>
+        }
+        @if (hasError('email', 'email')) {
+          <span class="field-error">Enter a valid email address</span>
+        }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <div class="input-wrapper" [class.input-error]="hasError('password', 'required')">
+          <span class="input-icon material-symbols-rounded">lock</span>
+          <input
+            class="input-field input-with-icon input-with-action"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Min. 8 characters"
+            autocomplete="current-password"
+          />
+          <button type="button" class="password-toggle" (click)="togglePassword()">
+            <span class="material-symbols-rounded">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+        @if (hasError('password', 'required')) {
+          <span class="field-error">Password is required</span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg w-full submit-btn"
+        [disabled]="loading()"
+      >
+        @if (loading()) {
+          <span class="spinner-sm"></span>
+          Signing in...
+        } @else {
+          <span class="material-symbols-rounded">login</span>
+          Sign In
+        }
+      </button>
+
+    </form>
+
+    <div class="divider"><span>or</span></div>
+
+    <p class="register-link">
+      Don't have an account?
+      <a routerLink="/register">Create one free</a>
+    </p>
+
+  </div>
+</div>

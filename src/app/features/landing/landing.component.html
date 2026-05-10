@@ -1,0 +1,175 @@
+﻿<!-- ── Animated aurora + grid background ────────────────── -->
+<div class="landing-bg" aria-hidden="true">
+  <div class="aurora aurora-1"></div>
+  <div class="aurora aurora-2"></div>
+  <div class="aurora aurora-3"></div>
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="floaters">
+    <span class="floater f1">✨</span>
+    <span class="floater f2">💰</span>
+    <span class="floater f3">📝</span>
+    <span class="floater f4">⏰</span>
+    <span class="floater f5">📊</span>
+  </div>
+</div>
+
+<div class="landing-wrap">
+
+  <!-- ── Navbar ──────────────────────────────────────────────── -->
+  <nav class="landing-nav">
+    <div class="nav-brand">
+      <span class="brand-icon material-symbols-rounded">self_improvement</span>
+      <span class="brand-name gradient-text">Mantra</span>
+    </div>
+    <div class="nav-actions">
+      <a routerLink="/login"    class="btn btn-secondary btn-sm">Sign In</a>
+      <a routerLink="/register" class="btn btn-primary   btn-sm">Get Started Free</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <section class="hero animate-fade-slide-in">
+    <div class="hero-badge">
+      <span class="material-symbols-rounded">auto_awesome</span>
+      Your all-in-one daily life assistant
+    </div>
+    <h1 class="hero-title">
+      One app for<br>
+      <span class="gradient-text">everything in your life</span>
+    </h1>
+    <p class="hero-sub">
+      Split bills, set reminders, capture notes and track expenses — beautifully designed, blazing fast, and always with you.
+    </p>
+    <div class="hero-ctas">
+      <a routerLink="/register" class="btn btn-primary btn-lg">
+        <span class="material-symbols-rounded">rocket_launch</span> Start for free
+      </a>
+    </div>
+    <p class="hero-note text-muted font-xs">No credit card required · Free forever</p>
+  </section>
+
+  <!-- ── Live info widgets ────────────────────────────────────── -->
+  <div class="widgets-grid">
+
+    <!-- Clock -->
+    <div class="widget widget-clock glass-card">
+      <div class="widget-label">
+        <span class="material-symbols-rounded">schedule</span> Local Time
+      </div>
+      <p class="clock-time">{{ currentTime() }}</p>
+      <p class="clock-date">{{ currentDate() }}</p>
+      <p class="clock-tz text-muted font-xs">{{ timezone() }}</p>
+    </div>
+
+    <!-- Weather — open-meteo.com (free, no API key) -->
+    <div class="widget widget-weather glass-card">
+      <div class="widget-label">
+        <span class="material-symbols-rounded">wb_sunny</span> Weather
+        <span class="api-badge">open-meteo.com</span>
+      </div>
+      @if (weatherLoading()) {
+        <div class="widget-center"><div class="spinner"></div></div>
+      } @else if (weatherError()) {
+        <div class="widget-center">
+          <span class="material-symbols-rounded" style="font-size:2rem;color:var(--text-muted)">cloud_off</span>
+          <p class="font-xs text-muted mt-8">Enable location for weather</p>
+        </div>
+      } @else if (weather(); as w) {
+        <div class="weather-main">
+          <span class="weather-emoji">{{ w.emoji }}</span>
+          <p class="weather-temp">{{ w.temp }}<span>°C</span></p>
+        </div>
+        <p class="weather-label fw-500">{{ w.label }}</p>
+        <p class="weather-location text-muted font-xs">
+          📍 {{ w.city }}{{ w.country ? ', ' + w.country : '' }}
+        </p>
+        <div class="weather-stats">
+          <span class="weather-stat">💨 {{ w.windSpeed }} km/h</span>
+          @if (w.humidity) {
+            <span class="weather-stat">💧 {{ w.humidity }}%</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Quote of the day -->
+    <div class="widget widget-quote glass-card">
+      <div class="widget-label">
+        <span class="material-symbols-rounded">format_quote</span> Quote of the Day
+      </div>
+      <span class="big-quote">"</span>
+      <p class="quote-text">{{ todaysQuote.q }}</p>
+      <p class="quote-author text-muted font-xs">— {{ todaysQuote.a }}</p>
+    </div>
+
+    <!-- Daily advice + fun fact — free APIs, no key -->
+    <div class="widget widget-facts glass-card">
+      <div class="widget-label">
+        <span class="material-symbols-rounded">lightbulb</span> Daily Insights
+        <span class="api-badge">adviceslip · uselessfacts</span>
+      </div>
+      @if (!advice() && !funFact()) {
+        <div class="widget-center"><div class="spinner"></div></div>
+      }
+      @if (advice(); as a) {
+        <div class="fact-block">
+          <span class="fact-tag">💡 Today's Advice</span>
+          <p class="fact-text">{{ a }}</p>
+        </div>
+      }
+      @if (funFact(); as f) {
+        <div class="fact-block fact-mt">
+          <span class="fact-tag">🤔 Did you know?</span>
+          <p class="fact-text">{{ f }}</p>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ── Feature cards ────────────────────────────────────────── -->
+  <section class="features-section">
+    <div class="section-header">
+      <h2>Everything you need, <span class="gradient-text">in one place</span></h2>
+      <p class="text-secondary">Create a free account to unlock all features</p>
+    </div>
+    <div class="features-grid">
+      @for (f of features; track f.label) {
+        <a routerLink="/register" class="feature-card glass-card tilt-hover" [style.--feature-color]="f.color">
+          @if (f.login) {
+            <span class="feature-badge" title="Login required">
+              <span class="material-symbols-rounded">lock</span>
+            </span>
+          }
+          <span class="feature-icon material-symbols-rounded" [style.color]="f.color">{{ f.icon }}</span>
+          <h3>{{ f.label }}</h3>
+          <p class="text-muted font-sm">{{ f.desc }}</p>
+        </a>
+      }
+    </div>
+  </section>
+
+  <!-- ── CTA ──────────────────────────────────────────────────── -->
+  <section class="cta-section glass-card">
+    <div class="orb-cta"></div>
+    <h2>Ready to take control?</h2>
+    <p class="text-secondary">Join thousands managing their life smarter with Mantra.</p>
+    <a routerLink="/register" class="btn btn-primary btn-lg cta-btn">
+      <span class="material-symbols-rounded">rocket_launch</span> Create free account
+    </a>
+  </section>
+
+  <footer class="landing-footer">
+    <p class="text-muted font-xs">
+      Weather by <a href="https://open-meteo.com" target="_blank" rel="noopener">open-meteo.com</a> ·
+      Advice by <a href="https://adviceslip.com" target="_blank" rel="noopener">adviceslip.com</a> ·
+      Facts by <a href="https://uselessfacts.jsph.pl" target="_blank" rel="noopener">uselessfacts.jsph.pl</a> ·
+      Photos by <a href="https://unsplash.com" target="_blank" rel="noopener">Unsplash</a>
+      &nbsp;·&nbsp; Mantra © {{ year }}
+    </p>
+  </footer>
+
+</div>

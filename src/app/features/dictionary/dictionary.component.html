@@ -1,0 +1,88 @@
+<section class="dict-page">
+  <div class="page-head">
+    <a routerLink="/app/dashboard" class="back-link">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Dashboard
+    </a>
+    <h1>Dictionary</h1>
+  </div>
+
+  <!-- Search -->
+  <form class="search-card glass-card" (ngSubmit)="search()">
+    <span class="material-symbols-rounded search-icon">search</span>
+    <input class="search-input"
+           type="text"
+           placeholder="Type a word and press Enter…"
+           [ngModel]="query()"
+           (ngModelChange)="query.set($event)"
+           name="query"
+           autocomplete="off"
+           autofocus />
+    <button type="submit" class="btn btn-primary" [disabled]="loading()">Look up</button>
+  </form>
+
+  <!-- Result -->
+  @if (loading()) {
+    <div class="dict-skeleton glass-card">Searching…</div>
+  } @else if (error()) {
+    <div class="dict-empty glass-card">
+      <span class="material-symbols-rounded">search_off</span>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (result(); as entries) {
+    @for (r of entries; track $index) {
+      <div class="result-card glass-card">
+        <div class="result-head">
+          <h2>{{ r.word }}</h2>
+          @if (r.phonetic) { <span class="phonetic">{{ r.phonetic }}</span> }
+        </div>
+
+        @for (m of r.meanings; track m.partOfSpeech) {
+          <div class="meaning-block">
+            <span class="pos">{{ m.partOfSpeech }}</span>
+
+            <ol class="definitions">
+              @for (d of m.definitions; track $index) {
+                <li>
+                  <p class="def">{{ d.definition }}</p>
+                  @if (d.example) {
+                    <p class="example">“{{ d.example }}”</p>
+                  }
+                </li>
+              }
+            </ol>
+
+            @if (m.synonyms?.length) {
+              <div class="syn-row">
+                <span class="syn-label">Synonyms:</span>
+                @for (s of m.synonyms; track s) {
+                  <button class="word-pill" (click)="pickWord(s)">{{ s }}</button>
+                }
+              </div>
+            }
+            @if (m.antonyms?.length) {
+              <div class="syn-row">
+                <span class="syn-label">Antonyms:</span>
+                @for (a of m.antonyms; track a) {
+                  <button class="word-pill" (click)="pickWord(a)">{{ a }}</button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Words of the day -->
+  <h2 class="section-title">Words of the Day</h2>
+  <p class="section-hint">Tap any word to look it up.</p>
+  <div class="words-grid">
+    @for (w of wordsOfDay(); track w; let i = $index) {
+      <button class="word-card glass-card" (click)="pickWord(w)">
+        <span class="word-num">{{ i + 1 }}</span>
+        <span class="word-text">{{ w }}</span>
+      </button>
+    }
+  </div>
+</section>

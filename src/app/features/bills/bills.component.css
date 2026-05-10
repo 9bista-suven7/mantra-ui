@@ -1,0 +1,214 @@
+.bills { max-width: 960px; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-header h2 { margin-bottom: 4px; }
+
+.loading-center { display: flex; justify-content: center; padding: 60px; }
+
+/* ── Summary strip ──────────────────────────────────────── */
+.summary-strip {
+  display: flex;
+  gap: 32px;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+}
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.summary-item .material-symbols-rounded { font-size: 1.6rem; }
+
+/* ── Filter tabs ────────────────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.filter-tab {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 18px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.filter-tab--active {
+  background: rgba(108, 99, 255, 0.15);
+  border-color: rgba(108, 99, 255, 0.3);
+  color: var(--primary-light);
+}
+.filter-tab:hover:not(.filter-tab--active) { border-color: var(--primary); color: var(--text-primary); }
+
+/* ── Bill cards ─────────────────────────────────────────── */
+.bills-list { display: flex; flex-direction: column; gap: 10px; }
+
+.bill-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  transition: all var(--transition-base);
+}
+.bill-card--overdue { border-color: rgba(255, 107, 107, 0.3) !important; }
+.bill-card:hover { transform: translateX(4px); }
+
+.bill-icon { font-size: 1.8rem; flex-shrink: 0; }
+
+.bill-body { flex: 1; min-width: 0; }
+.bill-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.bill-meta { flex-wrap: wrap; }
+.meta-info { padding: 2px 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-full); }
+.text-danger { color: var(--danger) !important; }
+
+.bill-amount-col { flex-shrink: 0; text-align: right; }
+.bill-amount { font-size: 1rem; font-family: var(--font-heading); color: var(--text-primary); }
+
+.bill-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* Modal (shared) */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+:host-context(html.light-mode) .modal-overlay {
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(6px) saturate(1.1);
+}
+.modal { width: 100%; max-width: 480px; padding: 18px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-header h3 { font-size: 0.95rem; }
+.field-group { margin-bottom: 10px; }
+.field-label { display: block; font-size: 0.65rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.modal .input-field { padding: 6px 10px; font-size: 0.78rem; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.modal-actions .btn { padding: 6px 14px; font-size: 0.78rem; }
+select.input-field { appearance: none; }
+
+.modal select.input-field {
+  background: #1e2336;
+  color: var(--text-primary, #e2e8f0);
+}
+.modal select.input-field option {
+  background: #1e2336;
+  color: var(--text-primary, #e2e8f0);
+}
+
+:host-context(html.light-mode) .modal select.input-field {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+:host-context(html.light-mode) .modal select.input-field option {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+.toggle-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ── Receipt drop-zone & preview ────────────────────────────── */
+.receipt-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1.5px dashed var(--border, rgba(255,255,255,0.15));
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: border-color 0.2s, background 0.2s;
+}
+.receipt-drop-zone:hover {
+  border-color: var(--primary, #818cf8);
+  background: rgba(129,140,248,0.06);
+}
+
+.receipt-preview {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+}
+.receipt-thumb {
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.receipt-file-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+.receipt-file-icon .material-symbols-rounded { font-size: 2rem; opacity: 0.6; }
+.receipt-clear {
+  position: absolute;
+  top: 4px; right: 4px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.receipt-clear .material-symbols-rounded { font-size: 0.85rem; color: #fff; }
+
+/* ── Receipt badge on bill card ────────────────────────────── */
+.receipt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(129,140,248,0.15);
+  color: #818cf8;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.receipt-badge:hover { background: rgba(129,140,248,0.28); }
+.receipt-badge .material-symbols-rounded { font-size: 0.85rem; }
+
+/* Light-mode */
+:host-context(html.light-mode) .receipt-drop-zone {
+  border-color: rgba(0,0,0,0.18);
+}
+:host-context(html.light-mode) .receipt-drop-zone:hover {
+  background: rgba(99,102,241,0.06);
+  border-color: #6366f1;
+}
+

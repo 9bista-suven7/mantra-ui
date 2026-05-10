@@ -1,0 +1,751 @@
+﻿<section class="splitwise animate-fade-slide-in">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2>Splitwise</h2>
+      <p class="text-secondary">Split expenses fairly with your people</p>
+    </div>
+    <button class="btn btn-primary" (click)="showCreateGroup.set(true)">
+      <span class="material-symbols-rounded">group_add</span> New Group
+    </button>
+  </div>
+
+  <div class="split-layout">
+
+    <!-- draw.io style SVG connector overlay -->
+    <svg class="flow-connector-svg" aria-hidden="true">
+      @if (flowPath1()) {
+        <path [attr.d]="flowPath1()" class="fc-path fc-path--1"/>
+        <circle [attr.cx]="flowDot1().x" [attr.cy]="flowDot1().y" r="5" class="fc-dot"/>
+      }
+      @if (flowPath2()) {
+        <path [attr.d]="flowPath2()" class="fc-path fc-path--2"/>
+        <circle [attr.cx]="flowDot2().x" [attr.cy]="flowDot2().y" r="5" class="fc-dot fc-dot--2"/>
+      }
+    </svg>
+
+    <!-- Groups panel -->
+    <aside class="groups-panel">
+    <!-- My Profile card -->
+    <div class="my-profile-card glass-card"
+         [class.my-profile-card--active]="showProfilePanel()"
+         (click)="openProfile()">
+      <div class="mpc-avatar">{{ currentUserInitials() }}</div>
+      <div class="mpc-info">
+        <p class="mpc-name">{{ currentUserName() }}</p>
+        @if (summaryLoading()) {
+          <p class="font-xs text-muted" style="margin:0">Loading...</p>
+        } @else if (myPersonalSummary().netTotal !== 0) {
+          <div class="mpc-status">
+            @if (myPersonalSummary().netTotal > 0) {
+              <span class="mpc-badge mpc-badge--receive">+{{ formatCurrency(myPersonalSummary().netTotal) }}</span>
+            } @else {
+              <span class="mpc-badge mpc-badge--owe">&minus;{{ formatCurrency(-myPersonalSummary().netTotal) }}</span>
+            }
+          </div>
+        } @else {
+          <p class="mpc-settled">All settled &#x2713;</p>
+        }
+      </div>
+      <span class="material-symbols-rounded mpc-chevron"
+            [class.mpc-chevron--open]="showProfilePanel()">chevron_right</span>
+    </div>
+
+    <p class="panel-title">My Groups</p>
+
+    @if (!groups().length) {
+        <div class="empty-state">
+          <span class="material-symbols-rounded" style="font-size:1.8rem;color:var(--text-muted)">group</span>
+          <p>No groups yet</p>
+          <button class="btn btn-primary btn-sm" (click)="showCreateGroup.set(true)">Create Group</button>
+        </div>
+      }
+
+      @for (group of groups(); track group.id) {
+        <div class="group-card glass-card"
+             [class.group-card--active]="selectedGroup()?.id === group.id"
+             [id]="selectedGroup()?.id === group.id ? 'flow-source-card' : null"
+             (click)="selectGroup(group)">
+          <span class="group-emoji">{{ group.emoji }}</span>
+          <div class="group-info">
+            <p class="fw-600">{{ group.name }}</p>
+            <p class="font-xs text-muted">
+              <span class="material-symbols-rounded" style="font-size:0.75rem;vertical-align:middle">group</span>
+              {{ group.memberIds.length }} members
+            </p>
+          </div>
+        </div>
+      }
+    </aside>
+
+    <!-- â”€â”€ Group detail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="group-detail">
+
+      @if (showProfilePanel()) {
+
+        <!-- ── My Profile detail view ─────────────────────────── -->
+        <div class="profile-detail animate-fade-slide-in">
+          <div class="detail-header">
+            <div class="detail-title">
+              <div class="pd-hero-avatar">{{ currentUserInitials() }}</div>
+              <div>
+                <h3>{{ currentUserName() }}</h3>
+                <p class="font-xs text-muted">Your balances across all groups</p>
+              </div>
+            </div>
+          </div>
+
+          @if (summaryLoading()) {
+            <div class="d-flex align-center justify-center p-24"><div class="spinner"></div></div>
+          } @else if (!myPersonalDetail().iOwe.length && !myPersonalDetail().owedToMe.length) {
+            <div class="empty-state" style="padding:40px 0">
+              <span class="material-symbols-rounded" style="font-size:2.5rem;color:#4ECCA3">check_circle</span>
+              <p class="text-secondary">All settled up! No pending balances.</p>
+            </div>
+          } @else {
+
+            @if (myPersonalDetail().owedToMe.length) {
+              <div class="section-label">
+                <span class="material-symbols-rounded">trending_up</span> Owed to you
+                <span class="pd-section-total receive">+{{ formatCurrency(personalDetailTotalOwed()) }}</span>
+              </div>
+              <div class="pd-person-rows">
+                @for (p of myPersonalDetail().owedToMe; track p.userId) {
+                  <div class="pd-person-row glass-card">
+                    <div class="pd-person-av pd-person-av--credit">{{ getPersonInitials(p.name) }}</div>
+                    <div class="pd-person-info">
+                      <p class="pd-person-name">{{ p.name }}</p>
+                      <p class="font-xs text-muted">owes you</p>
+                    </div>
+                    <span class="pd-person-amt receive">+{{ formatCurrency(p.total, p.currency) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (myPersonalDetail().iOwe.length) {
+              <div class="section-label">
+                <span class="material-symbols-rounded">trending_down</span> You owe
+                <span class="pd-section-total owe">−{{ formatCurrency(personalDetailTotalOwe()) }}</span>
+              </div>
+              <div class="pd-person-rows">
+                @for (p of myPersonalDetail().iOwe; track p.userId) {
+                  <div class="pd-person-row glass-card">
+                    <div class="pd-person-av pd-person-av--debt">{{ getPersonInitials(p.name) }}</div>
+                    <div class="pd-person-info">
+                      <p class="pd-person-name">{{ p.name }}</p>
+                      <p class="font-xs text-muted">you owe</p>
+                    </div>
+                    <span class="pd-person-amt owe">−{{ formatCurrency(p.total, p.currency) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (myPersonalSummary().rows.length) {
+              <div class="section-label">
+                <span class="material-symbols-rounded">group</span> By group
+              </div>
+              <div class="pd-group-rows">
+                @for (r of myPersonalSummary().rows; track r.group.id) {
+                  <div class="pd-group-row glass-card" (click)="selectGroup(r.group)">
+                    <span class="pd-group-emoji">{{ r.group.emoji }}</span>
+                    <span class="pd-group-name">{{ r.group.name }}</span>
+                    <span class="pd-group-amt" [class.owe]="r.net < 0" [class.receive]="r.net > 0">
+                      {{ r.net > 0 ? '+' : '' }}{{ formatCurrency(r.net, r.currency) }}
+                    </span>
+                    <span class="material-symbols-rounded" style="font-size:0.85rem;color:var(--text-muted)">chevron_right</span>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
+      } @else if (!selectedGroup()) {
+        <div class="empty-state tall-empty">
+          <span class="material-symbols-rounded" style="font-size:1.8rem;color:var(--text-muted)">touch_app</span>
+          <p class="text-secondary">Select a group to get started</p>
+        </div>
+
+      } @else {
+
+        <!-- Detail header -->
+        <div class="detail-header">
+          <div class="detail-title">
+            <span style="font-size:1.8rem">{{ selectedGroup()!.emoji }}</span>
+            <div>
+              <h3>{{ selectedGroup()!.name }}</h3>
+              <p class="font-xs text-muted">
+                <span class="material-symbols-rounded" style="font-size:0.75rem;vertical-align:middle">group</span>
+                {{ selectedGroup()!.memberIds.length }} members
+              </p>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-ghost btn-sm" (click)="showManageMembers.set(true)">
+              <span class="material-symbols-rounded">manage_accounts</span> Manage
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="showAddExpense.set(true)">
+              <span class="material-symbols-rounded">add_circle</span> Expense
+            </button>
+          </div>
+        </div>
+
+        @if (loading()) {
+          <div class="d-flex align-center justify-center p-24"><div class="spinner"></div></div>
+        } @else if (balances() || netBalancesWithNames().length) {
+          <div class="balance-flow-row">
+            <div class="balance-flow-col--balances">
+              <div class="section-label" id="flow-target-balances">
+                <span class="material-symbols-rounded">account_balance_wallet</span> Balances
+              </div>
+              <div class="balance-cards">
+                @for (b of netBalancesWithNames(); track b.userId) {
+                  <div class="balance-card glass-card" [class]="balanceClass(b.amount)">
+                    <div class="balance-av" [class]="'balance-av--' + balanceClass(b.amount)">{{ getMemberInitials(b.userId) }}</div>
+                    <div class="balance-info">
+                      <p class="balance-name fw-600">{{ getMemberName(b.userId) }}</p>
+                      <p class="balance-amount" [class]="'amount--' + balanceClass(b.amount)">
+                        @if (b.amount > 0) { +{{ formatCurrency(b.amount) }} }
+                        @else if (b.amount < 0) { {{ formatCurrency(b.amount) }} }
+                        @else { <span class="material-symbols-rounded" style="font-size:0.8rem;vertical-align:middle">check_circle</span> settled }
+                      </p>
+                    </div>
+                    <div class="balance-bar">
+                      <div class="balance-bar-fill"
+                           [class]="'bar-fill--' + balanceClass(b.amount)"
+                           [style.width.%]="b.barPct">
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (balances()?.suggestions?.length) {
+              <div class="balance-flow-col--flow">
+                <div class="section-label">
+                  <span class="material-symbols-rounded">swap_horiz</span> Settlement Flow
+                </div>
+                <div class="flow-graph">
+                  @for (s of balances()!.suggestions; track s.fromUserId + s.toUserId) {
+                    <div class="flow-card glass-card">
+                      <div class="flow-node flow-node--from">
+                        <div class="flow-avatar flow-avatar--debt">{{ getMemberInitials(s.fromUserId) }}</div>
+                        <div class="flow-node-info">
+                          <p class="flow-name">{{ s.fromDisplayName }}</p>
+                          <p class="flow-role flow-role--owes">owes</p>
+                        </div>
+                      </div>
+                      <div class="flow-pipe">
+                        <div class="flow-amount-pill">{{ formatCurrency(s.amount, s.currency) }}</div>
+                        <div class="flow-arrow-track">
+                          <div class="flow-arrow-shine"></div>
+                        </div>
+                        <span class="material-symbols-rounded flow-arrow-icon">arrow_forward</span>
+                      </div>
+                      <div class="flow-node flow-node--to">
+                        <div class="flow-node-info flow-node-info--right">
+                          <p class="flow-name">{{ s.toDisplayName }}</p>
+                          <p class="flow-role flow-role--gets">receives</p>
+                        </div>
+                        <div class="flow-avatar flow-avatar--credit">{{ getMemberInitials(s.toUserId) }}</div>
+                      </div>
+                      <button class="btn-settle" (click)="openSettle(s)">
+                        <span class="material-symbols-rounded">check_circle</span> Settle
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+
+          <!-- Expense list -->
+          <div class="section-label" id="flow-target-expenses">
+            <span class="material-symbols-rounded">receipt_long</span> Expenses
+          </div>
+
+          @if (!expenses().length) {
+            <div class="empty-state">
+              <span class="material-symbols-rounded" style="font-size:1.8rem;color:var(--text-muted)">receipt_long</span>
+              <p>No expenses yet. Add the first one!</p>
+            </div>
+          } @else {
+            <div class="expense-list">
+              @for (exp of expenses(); track exp.id) {
+                <div class="expense-item glass-card">
+                  <div class="expense-left">
+                    <div class="expense-info">
+                      <p class="fw-500">{{ exp.description }}</p>
+                      <p class="font-xs text-muted">
+                        {{ exp.expenseDate | date:'d MMM y' }}
+                        &middot; paid by <strong>{{ getMemberName(exp.paidById) }}</strong>
+                        &middot; {{ exp.splitType === 'EQUAL' ? 'equal' : 'custom' }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="expense-right">
+                    <div class="expense-amount">{{ formatCurrency(exp.amount, exp.currency) }}</div>
+                    @if (exp.splits && exp.splitType !== 'EQUAL') {
+                      <div class="splits-detail">
+                        @for (entry of exp.splits | keyvalue; track entry.key) {
+                          <span class="split-chip">
+                            {{ getMemberInitials(entry.key) }}: {{ formatCurrency(+entry.value, exp.currency) }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <button class="btn-icon btn-icon--danger expense-delete-btn"
+                          (click)="deleteExpense(exp)"
+                          title="Delete expense">
+                    <span class="material-symbols-rounded">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+        }
+
+      }
+    </div>
+  </div>
+
+  <!-- â”€â”€ Create group modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  @if (showCreateGroup()) {
+    <div class="modal-overlay animate-fade-in" (click)="showCreateGroup.set(false)">
+      <div class="modal glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3><span class="material-symbols-rounded">group_add</span> Create Group</h3>
+          <button class="btn-icon" (click)="showCreateGroup.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <form [formGroup]="groupForm" (ngSubmit)="createGroup()">
+          <div class="field-group">
+            <label class="field-label">Group Name *</label>
+            <input class="input-field" formControlName="name" placeholder="e.g. New York Trip 2026" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Category</label>
+            <select class="input-field" formControlName="category">
+              @for (c of CATEGORIES; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Add Members</label>
+            <input class="input-field" formControlName="memberEmails"
+              placeholder="friend@email.com, another@email.com" />
+            <p class="field-hint">Separate multiple emails with commas</p>
+          </div>
+          <div class="modal-actions">
+            @if (groupError()) {
+              <p class="modal-error">{{ groupError() }}</p>
+            }
+            <button type="button" class="btn btn-secondary" (click)="showCreateGroup.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Group</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- â”€â”€ Add expense modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  @if (showAddExpense()) {
+    <div class="modal-overlay animate-fade-in" (click)="showAddExpense.set(false)">
+      <div class="modal modal--expense glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3><span class="material-symbols-rounded">receipt</span> Add Expense</h3>
+          <button class="btn-icon" (click)="showAddExpense.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <form [formGroup]="expenseForm" (ngSubmit)="addExpense()">
+
+          <!-- Description -->
+          <div class="field-group">
+            <label class="field-label">What was it for? *</label>
+            <input class="input-field" formControlName="description" placeholder="e.g. Hotel booking, Dinner, Taxi..." />
+          </div>
+
+          <!-- Amount hero row -->
+          <div class="amount-hero">
+            <select class="amount-currency" formControlName="currency">
+              <option value="NPR">रू</option>
+              <option value="USD">$</option>
+              <option value="EUR">€</option>
+              <option value="GBP">£</option>
+            </select>
+            <input class="amount-big-input" type="number"
+              formControlName="amount"
+              placeholder="0"
+              min="0.01" step="0.01"
+              (input)="onAmountChange($any($event.target).value)" />
+          </div>
+
+          <!-- Date row -->
+          <div class="field-group">
+            <label class="field-label">Date</label>
+            <input class="input-field" type="date" formControlName="expenseDate" />
+          </div>
+
+          <!-- Paid by -->
+          <div class="field-group">
+            <label class="field-label">Paid by</label>
+            <div class="paid-by-pills">
+              @for (m of groupMembers(); track m.userId) {
+                <div class="paid-by-pill"
+                     [class.paid-by-pill--active]="paidByUserIdSig() === m.userId"
+                     (click)="paidByUserIdSig.set(m.userId)">
+                  <span class="pill-avatar">{{ m.initials }}</span>
+                  {{ m.displayName }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Who's involved -->
+          <div class="field-group">
+            <div class="field-row-between">
+              <label class="field-label" style="margin:0">Who's involved</label>
+              <button type="button" class="btn-text-sm" (click)="selectAllMembers()">Select all</button>
+            </div>
+            <div class="member-toggle-pills">
+              @for (m of groupMembers(); track m.userId) {
+                <div class="member-toggle-pill"
+                     [class.member-toggle-pill--on]="isMemberSelected(m.userId)"
+                     (click)="toggleMember(m.userId)">
+                  <span class="pill-avatar-sm">{{ m.initials }}</span>
+                  <span>{{ m.displayName }}</span>
+                  @if (isMemberSelected(m.userId)) {
+                    <span class="material-symbols-rounded check-icon">check_circle</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Split type toggle -->
+          <div class="field-group">
+            <label class="field-label">How to split</label>
+            <div class="split-type-toggle">
+              <button type="button" class="split-type-btn"
+                [class.split-type-btn--active]="expenseSplitType() === 'EQUAL'"
+                (click)="setSplitType('EQUAL')">
+                <span class="material-symbols-rounded">balance</span>
+                <span>Equal</span>
+              </button>
+              <button type="button" class="split-type-btn"
+                [class.split-type-btn--active]="expenseSplitType() === 'EXACT'"
+                (click)="setSplitType('EXACT')">
+                <span class="material-symbols-rounded">tune</span>
+                <span>Custom</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Equal preview -->
+          @if (expenseSplitType() === 'EQUAL' && selectedMemberIds().length && expenseAmount() > 0) {
+            <div class="equal-preview">
+              <span class="material-symbols-rounded">info</span>
+              Each of <strong>{{ selectedMemberIds().length }}</strong> people pays
+              <strong>{{ formatCurrency(expenseAmount() / selectedMemberIds().length) }}</strong>
+            </div>
+          }
+
+          <!-- Custom split section -->
+          @if (expenseSplitType() === 'EXACT' && selectedMemberIds().length) {
+            <div class="custom-splits">
+
+              <!-- Header with auto-share badge -->
+              <div class="custom-splits-header">
+                <span class="field-label" style="margin:0">Custom amounts</span>
+                @if (unlockedCount() > 0 && expenseAmount() > 0) {
+                  <span class="auto-badge">
+                    <span class="material-symbols-rounded" style="font-size:0.7rem">auto_fix_high</span>
+                    {{ formatCurrency(autoShareValue()) }} auto for {{ unlockedCount() }}
+                  </span>
+                }
+              </div>
+
+              <!-- Per-member rows -->
+              @for (m of groupMembers(); track m.userId) {
+                @if (isMemberSelected(m.userId)) {
+                  <div class="custom-split-row" [class.custom-split-row--locked]="isAmountLocked(m.userId)">
+                    <span class="split-avatar">{{ m.initials }}</span>
+                    <span class="split-member-name">{{ m.displayName }}</span>
+                    <div class="split-input-wrap">
+                      @if (!isAmountLocked(m.userId) && expenseAmount() > 0) {
+                        <span class="auto-label">{{ formatCurrency(autoShareValue()) }}</span>
+                      }
+                      <input class="input-field split-amount-input"
+                        type="number" min="0" step="0.01"
+                        [value]="isAmountLocked(m.userId) ? lockedAmounts()[m.userId] : ''"
+                        [placeholder]="expenseAmount() > 0 ? autoShareValue().toString() : '0'"
+                        (input)="setLockedSplit(m.userId, $any($event.target).value)"
+                      />
+                      @if (isAmountLocked(m.userId)) {
+                        <button type="button" class="clear-lock-btn" (click)="clearLockedSplit(m.userId)" title="Reset to auto">
+                          <span class="material-symbols-rounded">close</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+
+              <!-- Progress bar -->
+              <div class="split-progress-wrap">
+                <div class="split-progress-track">
+                  <div class="split-progress-fill"
+                       [style.width.%]="splitProgressPct()"
+                       [class.split-progress-fill--ok]="splitProgressPct() === 100">
+                  </div>
+                </div>
+                <span class="split-progress-label" [class.split-ok]="splitProgressPct() === 100">
+                  {{ formatCurrency(effectiveTotal()) }} / {{ formatCurrency(expenseAmount()) }}
+                </span>
+              </div>
+
+            </div>
+          }
+
+          <div class="modal-actions">
+            @if (expenseError()) {
+              <p class="modal-error">{{ expenseError() }}</p>
+            }
+            <button type="button" class="btn btn-secondary" (click)="showAddExpense.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary"
+              [disabled]="!expenseFormValid() || !selectedMemberIds().length">
+              Add Expense
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Delete group confirmation modal -->
+  @if (showDeleteGroupConfirm()) {
+    <div class="modal-overlay animate-fade-in" (click)="showDeleteGroupConfirm.set(false)">
+      <div class="modal glass-card animate-scale-in confirm-delete-card" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <span class="material-symbols-rounded text-danger">warning</span>
+        </div>
+        <h4>Delete "{{ selectedGroup()?.name }}"?</h4>
+        <p class="text-muted font-xs">This will permanently delete the group, all its expenses, and settlement records. This cannot be undone.</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" (click)="showDeleteGroupConfirm.set(false)">Cancel</button>
+          <button class="btn btn-danger" (click)="deleteGroup()">
+            <span class="material-symbols-rounded">delete_forever</span> Delete Group
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Manage members modal -->
+  @if (showManageMembers()) {
+    <div class="modal-overlay animate-fade-in" (click)="showManageMembers.set(false)">
+      <div class="modal glass-card animate-scale-in modal--members" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <span class="material-symbols-rounded modal-icon">group</span>
+          <h3 class="modal-title">Manage Members</h3>
+          <button class="btn-icon" (click)="showManageMembers.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <!-- Current members list -->
+        <div class="mgmt-members-list">
+          @for (m of groupMembers(); track m.userId) {
+            <div class="mgmt-member-row">
+              <span class="member-avatar">{{ m.initials }}</span>
+              <div class="mgmt-member-info">
+                <span class="mgmt-member-name">{{ m.displayName }}</span>
+                <span class="mgmt-member-email font-xs text-muted">{{ m.email }}</span>
+              </div>
+              @if (m.userId !== currentUserId() && isGroupCreator()) {
+                <button class="btn-icon btn-icon--danger"
+                        (click)="removeMember(m.userId)"
+                        title="Remove member">
+                  <span class="material-symbols-rounded">person_remove</span>
+                </button>
+              }
+              @if (m.userId === selectedGroup()?.createdById) {
+                <span class="creator-badge">creator</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Add member by email -->
+        <form [formGroup]="addMemberForm" (ngSubmit)="addMember()" class="mgmt-add-form">
+          <p class="field-label" style="margin-bottom:6px">Add member by email</p>
+          <div class="mgmt-add-row">
+            <input class="input-field" type="email"
+                   formControlName="email"
+                   placeholder="friend@example.com" />
+            <button type="submit" class="btn btn-primary btn-sm"
+                    [disabled]="!addMemberFormValid() || memberMgmtLoading()">
+              <span class="material-symbols-rounded">person_add</span>
+            </button>
+          </div>
+          @if (memberMgmtError()) {
+            <p class="modal-error">{{ memberMgmtError() }}</p>
+          }
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Settle modal -->
+  @if (showSettle()) {
+    <div class="modal-overlay animate-fade-in" (click)="showSettle.set(false)">
+      <div class="modal glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3><span class="material-symbols-rounded">payments</span> Settle Up</h3>
+          <button class="btn-icon" (click)="showSettle.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <form [formGroup]="settleForm" (ngSubmit)="confirmSettle()">
+          <div class="settle-to">
+            <span class="material-symbols-rounded" style="color:#4ECCA3;font-size:1.1rem">send</span>
+            Paying <strong>{{ settleTarget()?.toName }}</strong>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Amount</label>
+            <input class="input-field" type="number" formControlName="amount" min="0.01" step="0.01" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Note (optional)</label>
+            <input class="input-field" formControlName="notes" placeholder="e.g. UPI transfer" />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="showSettle.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!settleFormValid()">Confirm Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ── Member detail modal ──────────────────────────────────────────── -->
+  @if (showMemberDetail()) {
+    <div class="modal-overlay animate-fade-in" (click)="showMemberDetail.set(false)">
+      <div class="modal modal--detail glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>
+            <span class="material-symbols-rounded">account_circle</span>
+            @if (memberDetailData()?.isSelf) { Your Balance }
+            @else { {{ memberDetailData()?.member?.displayName }} }
+          </h3>
+          <button class="btn-icon" (click)="showMemberDetail.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        @if (memberDetailData(); as detail) {
+
+          @if (detail.isSelf) {
+            @if (!detail.toReceive.length && !detail.toPay.length) {
+              <div class="detail-settled">
+                <span class="material-symbols-rounded">check_circle</span>
+                All settled in this group!
+              </div>
+            }
+            @if (detail.toReceive.length) {
+              <div class="detail-section">
+                <div class="detail-section-title receive">
+                  <span class="material-symbols-rounded">trending_up</span>
+                  <span>People owe you</span>
+                  <span class="detail-total">+{{ formatCurrency(detail.totalReceive) }}</span>
+                </div>
+                @for (r of detail.toReceive; track r.fromUserId) {
+                  <div class="detail-row">
+                    <span class="detail-avatar detail-avatar--credit">{{ getMemberInitials(r.fromUserId) }}</span>
+                    <span class="detail-row-name">{{ r.fromDisplayName }}</span>
+                    <span class="detail-row-amount receive">+{{ formatCurrency(r.amount, r.currency) }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (detail.toPay.length) {
+              <div class="detail-section">
+                <div class="detail-section-title owe">
+                  <span class="material-symbols-rounded">trending_down</span>
+                  <span>You owe</span>
+                  <span class="detail-total">{{ formatCurrency(detail.totalPay) }}</span>
+                </div>
+                @for (p of detail.toPay; track p.toUserId) {
+                  <div class="detail-row">
+                    <span class="detail-avatar detail-avatar--debt">{{ getMemberInitials(p.toUserId) }}</span>
+                    <span class="detail-row-name">{{ p.toDisplayName }}</span>
+                    <span class="detail-row-amount owe">{{ formatCurrency(p.amount, p.currency) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+          } @else {
+            <div class="detail-member-hero">
+              <div class="detail-hero-avatar"
+                   [class.detail-hero-avatar--debt]="!!detail.iOwe"
+                   [class.detail-hero-avatar--credit]="!!detail.theyOwe">
+                {{ detail.member.initials }}
+              </div>
+              <div class="detail-hero-info">
+                <p class="detail-hero-name">{{ detail.member.displayName }}</p>
+                @if (detail.iOwe) {
+                  <p class="detail-hero-status owe">You owe <strong>{{ formatCurrency(detail.iOwe.amount, detail.iOwe.currency) }}</strong></p>
+                  <button class="btn btn-primary btn-sm" style="margin-top:8px" (click)="openSettleAndClose(detail.iOwe)">
+                    <span class="material-symbols-rounded">payments</span> Settle Up
+                  </button>
+                } @else if (detail.theyOwe) {
+                  <p class="detail-hero-status receive">Owes you <strong>{{ formatCurrency(detail.theyOwe.amount, detail.theyOwe.currency) }}</strong></p>
+                } @else {
+                  <p class="detail-hero-status neutral">All settled ✓</p>
+                }
+              </div>
+            </div>
+
+            @if (detail.sharedExpenses.length) {
+              <p class="detail-expenses-label">Shared expenses</p>
+              <div class="detail-expenses-list">
+                @for (exp of detail.sharedExpenses; track exp.id) {
+                  <div class="detail-expense-row">
+                    <div class="detail-exp-left">
+                      <div>
+                        <p class="detail-exp-desc">{{ exp.description }}</p>
+                        <p class="font-xs text-muted">{{ exp.expenseDate | date:'d MMM y' }} &middot; paid by {{ getMemberName(exp.paidById) }}</p>
+                      </div>
+                    </div>
+                    <div class="detail-exp-right">
+                      <p class="detail-exp-total">{{ formatCurrency(exp.amount, exp.currency) }}</p>
+                      @if (exp.splits[currentUserId()]) {
+                        <p class="font-xs text-muted">Your share: {{ formatCurrency(exp.splits[currentUserId()], exp.currency) }}</p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="font-xs text-muted" style="padding: 14px 0; text-align: center">No shared expenses yet</p>
+            }
+          }
+        }
+      </div>
+    </div>
+  }
+
+</section>

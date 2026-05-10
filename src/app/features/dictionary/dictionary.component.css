@@ -1,0 +1,162 @@
+.dict-page { padding: 16px 20px 32px; max-width: 1100px; margin: 0 auto; }
+
+.page-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+}
+.page-head h1 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #6C63FF, #FF6584);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;
+}
+.back-link:hover { color: var(--text-primary); }
+.back-link .material-symbols-rounded { font-size: 1.1rem; }
+
+/* Search card */
+.search-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.search-icon { color: var(--text-muted); font-size: 1.4rem; }
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: inherit;
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+.dict-skeleton, .dict-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.dict-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.dict-empty .material-symbols-rounded { font-size: 2.5rem; opacity: 0.5; }
+
+/* Result card */
+.result-card { padding: 20px 22px; margin-bottom: 16px; }
+.result-head {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 10px;
+}
+.result-head h2 {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  margin: 0;
+  text-transform: capitalize;
+}
+.phonetic {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+.meaning-block { margin-bottom: 14px; }
+.meaning-block:last-child { margin-bottom: 0; }
+.pos {
+  display: inline-block;
+  background: linear-gradient(135deg, #6C63FF, #9333EA);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.definitions {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.definitions li::marker { color: var(--text-muted); font-weight: 700; }
+.def { margin: 0; line-height: 1.5; color: var(--text-primary); }
+.example {
+  margin: 4px 0 0;
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.syn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 8px;
+}
+.syn-label { font-size: 0.78rem; color: var(--text-muted); margin-right: 4px; }
+.word-pill {
+  background: rgba(108, 99, 255, 0.12);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.word-pill:hover { background: rgba(108, 99, 255, 0.22); }
+
+/* Words of the day */
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin: 24px 0 4px;
+}
+.section-hint { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 12px; }
+
+.words-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.word-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.word-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.07);
+}
+.word-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+  background: linear-gradient(135deg, #6C63FF, #FF6584);
+  color: #fff;
+  flex-shrink: 0;
+}
+.word-text { font-size: 0.92rem; font-weight: 600; text-transform: capitalize; }

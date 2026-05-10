@@ -1,0 +1,124 @@
+<div class="input-bar">
+  <!-- Hidden file input -->
+  <input
+    #fileInput
+    type="file"
+    accept="image/*,.pdf,.doc,.docx,.txt,audio/*,video/*"
+    class="hidden-file-input"
+    (change)="onFileSelected($event)" />
+
+  @if (recording()) {
+    <!-- Recording mode -->
+    <button class="action-btn rec-cancel" (click)="cancelRecording()" title="Cancel">
+      <span class="material-icons">close</span>
+    </button>
+    <div class="rec-bar">
+      <span class="rec-dot"></span>
+      <span class="rec-time">{{ formatRecordTime() }}</span>
+      <span class="rec-text">Recording…</span>
+    </div>
+    <button class="send-btn rec-stop" (click)="toggleRecording()" title="Stop &amp; send">
+      <span class="material-icons">send</span>
+    </button>
+  } @else {
+    <!-- Attach -->
+    <button class="action-btn" (click)="openFilePicker()" [disabled]="uploading()" title="Attach file">
+      @if (uploading()) {
+        <div class="mini-spinner"></div>
+      } @else {
+        <span class="material-icons">attach_file</span>
+      }
+    </button>
+
+    <!-- Emoji -->
+    <div class="picker-host">
+      <button class="action-btn" (click)="$event.stopPropagation(); toggleEmoji()"
+              [class.active]="showEmoji()" [disabled]="uploading()" title="Emoji">
+        <span class="material-icons">mood</span>
+      </button>
+      @if (showEmoji()) {
+        <div class="picker-pop emoji-pop" (click)="$event.stopPropagation()">
+          <div class="picker-tabs">
+            @for (cat of emojiCategories; track cat.name; let i = $index) {
+              <button class="picker-tab" [class.active]="activeEmojiCat() === i"
+                      (click)="setEmojiCat(i)" [title]="cat.name">
+                {{ cat.emojis[0] }}
+              </button>
+            }
+          </div>
+          <div class="emoji-grid">
+            @for (e of emojiCategories[activeEmojiCat()].emojis; track e) {
+              <button class="emoji-cell" (click)="insertEmoji(e)">{{ e }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- GIF -->
+    <div class="picker-host">
+      <button class="action-btn gif-btn" (click)="$event.stopPropagation(); toggleGif()"
+              [class.active]="showGif()" [disabled]="uploading()" title="GIF">
+        GIF
+      </button>
+      @if (showGif()) {
+        <div class="picker-pop gif-pop" (click)="$event.stopPropagation()">
+          <p class="picker-title">Send a GIF</p>
+          <div class="gif-grid">
+            @for (g of presetGifs; track g.url) {
+              <button class="gif-cell" (click)="pickGif(g.url)" [disabled]="uploading()" [title]="g.label">
+                <img [src]="g.url" [alt]="g.label" loading="lazy" />
+                <span class="gif-label">{{ g.label }}</span>
+              </button>
+            }
+          </div>
+          <div class="gif-url-row">
+            <input type="text"
+                   class="gif-url-input"
+                   placeholder="Paste a GIF URL…"
+                   [value]="gifUrl()"
+                   (input)="gifUrl.set($any($event.target).value)" />
+            <button class="picker-send"
+                    [disabled]="!gifUrl().trim() || uploading()"
+                    (click)="sendGifFromUrl()">
+              Send
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Audio -->
+    <button class="action-btn"
+            (click)="toggleRecording()"
+            [disabled]="uploading()"
+            title="Record voice">
+      <span class="material-icons">mic</span>
+    </button>
+
+    <!-- Text -->
+    <textarea
+      #textInput
+      class="message-textarea"
+      placeholder="Type a message…"
+      rows="1"
+      [value]="text()"
+      (input)="onInput($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+      [disabled]="sending() || uploading()">
+    </textarea>
+
+    <!-- Send -->
+    <button
+      class="send-btn"
+      (click)="send()"
+      [disabled]="!text().trim() || sending() || uploading()"
+      title="Send (Enter)">
+      @if (sending()) {
+        <div class="mini-spinner send-spinner"></div>
+      } @else {
+        <span class="material-icons">send</span>
+      }
+    </button>
+  }
+</div>

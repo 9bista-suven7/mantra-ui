@@ -1,0 +1,187 @@
+.layout-shell {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  background: var(--bg-base);
+  overflow: hidden;
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-base);
+}
+
+.layout-content {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-y: auto;
+  min-height: 0;
+  animation: fadeSlideIn 0.35s ease both;
+}
+
+/* Chat route: no padding, full height for split-pane layout */
+.layout-content:has(app-chat) {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .layout-main { margin-left: 0; }
+  .layout-content { padding: 20px 16px; }
+  .layout-content:has(app-chat) { padding: 0; }
+}
+
+/* ── Inactivity warning overlay ───────────────────────────────── */
+.idle-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.25s ease;
+}
+
+.idle-card {
+  background: var(--bg-card, #1a1f2e);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 40px 36px;
+  text-align: center;
+  width: min(420px, 90vw);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.idle-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.idle-icon {
+  font-size: 48px;
+  color: #f59e0b;
+  animation: pulse 2s infinite;
+}
+
+.idle-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0 0 10px;
+}
+
+.idle-body {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.idle-countdown {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ef4444;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+
+.idle-unit {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 28px;
+}
+
+.idle-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.idle-btn-stay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.idle-btn-stay:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.idle-btn-stay .material-icons {
+  font-size: 18px;
+}
+
+.idle-btn-logout {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: transparent;
+  color: #ef4444;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.idle-btn-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Light-mode overrides */
+:host-context(html.light-mode) .idle-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+:host-context(html.light-mode) .idle-title {
+  color: #1e293b;
+}
+
+:host-context(html.light-mode) .idle-body,
+:host-context(html.light-mode) .idle-unit {
+  color: #64748b;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.7; transform: scale(1.08); }
+}

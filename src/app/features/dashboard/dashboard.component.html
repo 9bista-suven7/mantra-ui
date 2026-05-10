@@ -1,0 +1,201 @@
+<section class="dashboard">
+
+  <!-- Greeting -->
+  <div class="greeting animate-fade-slide-in">
+    <div>
+      <h1>{{ greetingMessage() }},
+        @if (auth.currentUser(); as u) {
+          <span class="gradient-text">{{ u.displayName.split(' ')[0] }}</span>
+        }
+        👋
+      </h1>
+      <p class="text-secondary">Here's what's happening today.</p>
+    </div>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="stats-grid">
+    @for (stat of stats(); track stat.label; let i = $index) {
+      <a [routerLink]="stat.route" class="stat-card glass-card"
+         [style.animation-delay]="(i * 0.06) + 's'">
+        <div class="stat-icon" [style.background]="stat.color + '22'" [style.color]="stat.color">
+          <span class="material-symbols-rounded">{{ stat.icon }}</span>
+        </div>
+        <div class="stat-body">
+          @if (loading()) {
+            <div class="skeleton-val"></div>
+          } @else {
+            <div class="stat-value" [style.color]="stat.color">{{ stat.value }}</div>
+          }
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+        <span class="stat-arrow material-symbols-rounded">arrow_forward_ios</span>
+      </a>
+    }
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section-header mt-16">
+    <h3>Quick Actions</h3>
+  </div>
+  <div class="quick-actions">
+    @for (action of quickActions; track action.label) {
+      <a [routerLink]="action.route" class="action-tile glass-card">
+        <span class="action-icon material-symbols-rounded" [style.color]="action.color">{{ action.icon }}</span>
+        <span class="action-label">{{ action.label }}</span>
+      </a>
+    }
+  </div>
+
+  <!-- ── Daily Brief ─────────────────────────────────────────────── -->
+  <div class="section-header mt-16">
+    <h3>Daily Brief</h3>
+  </div>
+  <div class="quick-actions">
+    <a routerLink="/app/weather" class="action-tile glass-card" title="Open detailed weather">
+      <span class="action-icon material-symbols-rounded" style="color:#00D9FF">cloud</span>
+      <span class="action-label">Weather</span>
+    </a>
+    <a routerLink="/app/dictionary" class="action-tile glass-card" title="Open dictionary">
+      <span class="action-icon material-symbols-rounded" style="color:#6C63FF">menu_book</span>
+      <span class="action-label">Dictionary</span>
+    </a>
+    <a routerLink="/app/horoscope" class="action-tile glass-card" title="Open horoscope">
+      <span class="action-icon material-symbols-rounded" style="color:#a855f7">stars</span>
+      <span class="action-label">Horoscope</span>
+    </a>
+    <a routerLink="/app/dictionary" class="action-tile glass-card" title="Words of the day">
+      <span class="action-icon material-symbols-rounded" style="color:#FF6584">auto_stories</span>
+      <span class="action-label">Words of the Day</span>
+    </a>
+  </div>
+
+  <!-- Currency converter — frankfurter.app (ECB rates, free, no key) -->
+  <div class="fx-card glass-card">
+    <div class="fx-head">
+      <span class="material-symbols-rounded fx-head-icon" style="color:#4ECCA3">currency_exchange</span>
+      <div class="fx-head-text">
+        <h4>Currency Converter</h4>
+        <span class="text-muted font-xs">Live rates · open.er-api.com</span>
+      </div>
+    </div>
+    <div class="fx-row">
+      <input
+        class="fx-amount"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        [value]="fxAmount()"
+        (input)="setFxAmount($any($event.target).value)" />
+
+      <!-- Custom FROM dropdown (no native select → no Windows white-flash) -->
+      <div class="fx-dd" [class.open]="fxFromOpen()">
+        <button type="button" class="fx-dd-btn" (click)="toggleFxFrom()" (blur)="fxFromOpen.set(false)">
+          {{ fxFrom() }}
+          <span class="material-symbols-rounded fx-dd-caret">expand_more</span>
+        </button>
+        @if (fxFromOpen()) {
+          <ul class="fx-dd-menu" role="listbox">
+            @for (c of fxCurrencies; track c) {
+              <li role="option"
+                  [class.active]="c === fxFrom()"
+                  (mousedown)="pickFxFrom(c)">{{ c }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      <button class="fx-swap" type="button" (click)="swapFx()" title="Swap currencies">
+        <span class="material-symbols-rounded">swap_horiz</span>
+      </button>
+
+      <!-- Custom TO dropdown -->
+      <div class="fx-dd" [class.open]="fxToOpen()">
+        <button type="button" class="fx-dd-btn" (click)="toggleFxTo()" (blur)="fxToOpen.set(false)">
+          {{ fxTo() }}
+          <span class="material-symbols-rounded fx-dd-caret">expand_more</span>
+        </button>
+        @if (fxToOpen()) {
+          <ul class="fx-dd-menu" role="listbox">
+            @for (c of fxCurrencies; track c) {
+              <li role="option"
+                  [class.active]="c === fxTo()"
+                  (mousedown)="pickFxTo(c)">{{ c }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+    <div class="fx-result">
+      @if (fxLoading()) {
+        <div class="spinner sm"></div>
+      } @else if (fxError()) {
+        <span class="text-muted font-xs">Couldn't fetch rate — try again later</span>
+      } @else if (fxResult() !== null) {
+        <span class="fx-out">{{ fxAmount() }} {{ fxFrom() }} = <strong>{{ fxResult() }}</strong> {{ fxTo() }}</span>
+        @if (fxRate() && fxFrom() !== fxTo()) {
+          <span class="fx-rate text-muted font-xs">1 {{ fxFrom() }} ≈ {{ fxRate() }} {{ fxTo() }}</span>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ── Discover (clickable category tiles) ──────────────────── -->
+  <div class="section-header mt-16">
+    <h3>Discover</h3>
+  </div>
+  <div class="placeholder-grid">
+    @for (cat of discoverCategories(); track cat.id) {
+      <button type="button" class="ph-tile glass-card" [title]="cat.label" (click)="openCategory(cat.id)">
+        <span class="material-symbols-rounded" [style.color]="cat.color">{{ cat.icon }}</span>
+        <span class="ph-label">{{ cat.label }}</span>
+      </button>
+    }
+  </div>
+
+</section>
+
+<!-- ── Discover Modal (portaled to <body> via effect) ──────────── -->
+@if (activeCategory(); as cat) {
+  <div #discoverOverlay class="discover-overlay" (click)="closeCategory()">
+    <div class="discover-modal" (click)="$event.stopPropagation()">
+      <header class="discover-header" [style.--cat-color]="cat.color">
+        <div class="discover-icon-wrap">
+          <span class="material-symbols-rounded">{{ cat.icon }}</span>
+        </div>
+        <div class="discover-title">
+          <h2>{{ cat.label }}</h2>
+          <p>{{ cat.tagline }}</p>
+        </div>
+        <button type="button" class="discover-close" (click)="closeCategory()" aria-label="Close">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </header>
+
+      <div class="discover-body">
+        @for (sec of cat.sections; track sec.title) {
+          <section class="discover-section">
+            <div class="discover-section-header">
+              <span class="material-symbols-rounded" [style.color]="cat.color">{{ sec.icon }}</span>
+              <h3>{{ sec.title }}</h3>
+            </div>
+            <div class="discover-items">
+              @for (item of sec.items; track item.url) {
+                <a class="discover-item" [href]="item.url" target="_blank" rel="noopener noreferrer">
+                  <div class="discover-item-main">
+                    <span class="discover-item-label">{{ item.label }}</span>
+                    @if (item.hint) {
+                      <span class="discover-item-hint">{{ item.hint }}</span>
+                    }
+                  </div>
+                  <span class="material-symbols-rounded discover-item-arrow">open_in_new</span>
+                </a>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  </div>
+}
+

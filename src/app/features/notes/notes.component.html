@@ -1,0 +1,140 @@
+<section class="notes animate-fade-slide-in">
+
+  <!-- ── Page header ─────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <h2>Notes</h2>
+      <p class="text-secondary">Drag cards anywhere · double-click to edit</p>
+    </div>
+    <button class="btn btn-primary" (click)="openForm()">
+      <span class="material-symbols-rounded">note_add</span> New Note
+    </button>
+  </div>
+
+  <!-- ── States ──────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-center"><div class="spinner"></div></div>
+
+  } @else if (!notes().length) {
+    <div class="empty-state">
+      <span class="empty-icon">📝</span>
+      <p>Your notes will appear here</p>
+      <button class="btn btn-primary" (click)="openForm()">Write Something</button>
+    </div>
+
+  } @else {
+
+    <!-- ── Sticky board ─────────────────────────────────────────────────── -->
+    <div class="sticky-board">
+      @for (note of notes(); track note.id) {
+        <div
+          class="sticky-card"
+          [class.is-dragging]="draggingId() === note.id"
+          [class.is-pinned]="note.pinned"
+          [style.left.px]="notePos(note.id).x"
+          [style.top.px]="notePos(note.id).y"
+          [style.background]="note.color"
+          [style.color]="textColor(note.color)"
+          [style.transform]="noteTransform(note.id)"
+        >
+          <!-- Drag handle (top bar) -->
+          <div class="card-handle" (mousedown)="startDrag($event, note.id)">
+            <span class="material-symbols-rounded handle-icon">drag_indicator</span>
+            @if (note.pinned) {
+              <span class="material-symbols-rounded pin-icon"
+                    [style.font-variation-settings]="'\'FILL\' 1'">push_pin</span>
+            }
+          </div>
+
+          <!-- Body — double-click to edit -->
+          <div class="card-body" (dblclick)="openForm(note)">
+            <p class="card-title">{{ note.title }}</p>
+            @if (note.content) {
+              <p class="card-text" [style.color]="mutedColor(note.color)">
+                {{ note.content | slice:0:200 }}{{ note.content.length > 200 ? '…' : '' }}
+              </p>
+            }
+            @if (note.tags?.length) {
+              <div class="card-tags">
+                @for (tag of note.tags!; track tag) {
+                  <span class="card-tag" [style.color]="mutedColor(note.color)">#{{ tag }}</span>
+                }
+              </div>
+            }
+            <p class="card-date" [style.color]="mutedColor(note.color)">
+              {{ note.updatedAt | date:'MMM d' }}
+            </p>
+          </div>
+
+          <!-- Actions (revealed on hover) -->
+          <div class="card-actions">
+            <button class="card-btn" (click)="togglePin(note.id)"
+                    [title]="note.pinned ? 'Unpin' : 'Pin'">
+              <span class="material-symbols-rounded"
+                    [style.font-variation-settings]="note.pinned ? '\'FILL\' 1' : '\'FILL\' 0'">
+                push_pin
+              </span>
+            </button>
+            <button class="card-btn" (click)="openForm(note)" title="Edit">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            <button class="card-btn card-btn--delete" (click)="delete(note.id)" title="Delete">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Form modal ──────────────────────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="modal-overlay animate-fade-in" (click)="showForm.set(false)">
+      <div class="modal glass-card animate-scale-in"
+           (click)="$event.stopPropagation()"
+           [style.border-color]="form.value.color">
+        <div class="modal-header">
+          <h3>{{ editId() ? 'Edit Note' : 'New Note' }}</h3>
+          <button class="btn-icon" (click)="showForm.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="field-group">
+            <label class="field-label">Title *</label>
+            <input class="input-field" formControlName="title" placeholder="Note title…" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Content</label>
+            <textarea class="input-field" formControlName="content"
+                      rows="5" placeholder="Start writing…"></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Tags (comma-separated)</label>
+            <input class="input-field" formControlName="tags"
+                   placeholder="work, ideas, personal" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Colour</label>
+            <div class="color-picker">
+              @for (c of colors; track c) {
+                <button type="button" class="color-swatch" [style.background]="c"
+                        [class.color-swatch--active]="form.value.color === c"
+                        (click)="setColor(c)">
+                </button>
+              }
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary"
+                    (click)="showForm.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary"
+                    [disabled]="form.invalid">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</section>
+

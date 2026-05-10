@@ -1,0 +1,58 @@
+@if (notifSvc.panelOpen()) {
+  <!-- Backdrop -->
+  <div class="notif-backdrop" (click)="notifSvc.closePanel()"></div>
+
+  <!-- Panel -->
+  <div class="notif-panel" (click)="onPanelClick($event)">
+
+    <!-- Header -->
+    <div class="panel-header">
+      <span class="panel-title">
+        <span class="material-icons panel-bell">notifications</span>
+        Notifications
+        @if (notifSvc.unreadCount() > 0) {
+          <span class="panel-badge">{{ notifSvc.unreadCount() }}</span>
+        }
+      </span>
+      <div class="panel-actions">
+        @if (notifSvc.unreadCount() > 0) {
+          <button class="action-link" (click)="notifSvc.markAllRead()">Mark all read</button>
+        }
+        @if (notifSvc.all().length > 0) {
+          <button class="action-link danger" (click)="notifSvc.clearAll()">Clear all</button>
+        }
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="notif-list">
+      @if (notifSvc.all().length === 0) {
+        <div class="empty-state">
+          <span class="material-icons empty-icon">notifications_off</span>
+          <p>You're all caught up!</p>
+        </div>
+      }
+
+      @for (n of notifSvc.all(); track trackById($index, n)) {
+        <div class="notif-item" [class.unread]="!n.read" (click)="onMarkRead(n, $event)">
+
+          <span class="notif-icon-wrap" [style.color]="n.iconColor">
+            <span class="material-icons notif-icon">{{ n.icon }}</span>
+          </span>
+
+          <div class="notif-body">
+            <span class="notif-title">{{ n.title }}</span>
+            <span class="notif-text">{{ n.body }}</span>
+            <span class="notif-time">{{ relativeTime(n.ts) }}</span>
+          </div>
+
+          <button class="dismiss-btn" title="Dismiss" (click)="onDismiss(n, $event)">
+            <span class="material-icons">close</span>
+          </button>
+
+        </div>
+      }
+    </div>
+
+  </div>
+}

@@ -1,0 +1,204 @@
+:host {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chat-root {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+  overflow: hidden;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-surface, #0f1423);
+}
+
+.empty-state {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sliding background image */
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  transform: scale(1.04);
+}
+.bg-slide.visible {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.8s ease, transform 8s ease;
+}
+
+/* Dark overlay so text stays readable */
+.empty-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glassmorphism card in center */
+.empty-glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 2rem 3rem;
+  background: rgba(15, 20, 35, 0.55);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  animation: fadeUp 0.5s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--primary, #6C63FF);
+  opacity: 0.75;
+}
+
+.empty-glass p {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.6);
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
+}
+
+/* ══ LIGHT MODE ═════════════════════════════════════════════ */
+:host-context(html.light-mode) .chat-main {
+  background: var(--bg-surface);
+}
+:host-context(html.light-mode) .empty-overlay {
+  background: rgba(240, 244, 251, 0.65);
+}
+:host-context(html.light-mode) .empty-glass {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(108, 99, 255, 0.2);
+}
+:host-context(html.light-mode) .empty-glass p { color: var(--text-secondary); }
+
+/* ── Confirm Dialog ─────────────────────────────────────────── */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 11, 22, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.confirm-dialog {
+  width: min(420px, 92vw);
+  background: linear-gradient(180deg, rgba(28, 33, 54, 0.98), rgba(20, 24, 40, 0.98));
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: 18px;
+  padding: 1.5rem 1.5rem 1.25rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  text-align: center;
+  animation: popIn 0.22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.confirm-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 0.85rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(108, 99, 255, 0.18);
+  color: #b3aeff;
+}
+.confirm-icon .material-icons { font-size: 30px; }
+.confirm-dialog.danger .confirm-icon {
+  background: rgba(255, 90, 90, 0.18);
+  color: #ff8a8a;
+}
+.confirm-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.confirm-message {
+  margin: 0 0 1.25rem;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+.confirm-actions button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.btn-cancel {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+}
+.btn-cancel:hover { background: rgba(255,255,255,0.14); }
+.btn-confirm {
+  background: linear-gradient(135deg, #6C63FF, #5048e5);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+}
+.btn-confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(108,99,255,0.5); }
+.btn-confirm.danger {
+  background: linear-gradient(135deg, #ff5a5a, #e04545);
+  box-shadow: 0 4px 14px rgba(255,90,90,0.35);
+}
+.btn-confirm.danger:hover { box-shadow: 0 6px 18px rgba(255,90,90,0.5); }
+
+/* Light mode */
+:host-context(html.light-mode) .confirm-backdrop { background: rgba(20, 24, 40, 0.45); }
+:host-context(html.light-mode) .confirm-dialog {
+  background: #fff;
+  border-color: var(--border);
+}
+:host-context(html.light-mode) .confirm-title { color: var(--text-primary); }
+:host-context(html.light-mode) .confirm-message { color: var(--text-secondary); }
+:host-context(html.light-mode) .btn-cancel {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+:host-context(html.light-mode) .btn-cancel:hover { background: var(--bg-card-hover); }

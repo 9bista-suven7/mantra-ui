@@ -1,0 +1,92 @@
+<div class="login-page">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="login-card animate-scale-in">
+
+    <div class="logo-area">
+      <div class="logo-icon">
+        <span class="material-symbols-rounded">person_add</span>
+      </div>
+      <h1 class="logo-title gradient-text">Join Mantra</h1>
+      <p class="logo-subtitle">Create your free account today</p>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error animate-fade-in">
+        <span class="material-symbols-rounded">error</span>
+        {{ error() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Display Name</label>
+          <div class="input-wrapper" [class.input-error]="hasError('displayName', 'required')">
+            <span class="input-icon material-symbols-rounded">badge</span>
+            <input class="input-field input-with-icon" type="text" formControlName="displayName" placeholder="Your full name" />
+          </div>
+          @if (hasError('displayName', 'required')) { <span class="field-error">Name is required</span> }
+          @if (hasError('displayName', 'minlength')) { <span class="field-error">At least 2 characters</span> }
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Username</label>
+          <div class="input-wrapper" [class.input-error]="hasError('username', 'required') || hasError('username', 'pattern')">
+            <span class="input-icon material-symbols-rounded">alternate_email</span>
+            <input class="input-field input-with-icon" type="text" formControlName="username" placeholder="letters, digits, _" />
+          </div>
+          @if (hasError('username', 'required')) { <span class="field-error">Username is required</span> }
+          @if (hasError('username', 'pattern')) { <span class="field-error">Only letters, digits and _</span> }
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Email address</label>
+        <div class="input-wrapper" [class.input-error]="hasError('email', 'required') || hasError('email', 'email')">
+          <span class="input-icon material-symbols-rounded">mail</span>
+          <input class="input-field input-with-icon" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        @if (hasError('email', 'required')) { <span class="field-error">Email is required</span> }
+        @if (hasError('email', 'email')) { <span class="field-error">Enter a valid email</span> }
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <div class="input-wrapper" [class.input-error]="hasError('password', 'required') || hasError('password', 'minlength')">
+          <span class="input-icon material-symbols-rounded">lock</span>
+          <input
+            class="input-field input-with-icon input-with-action"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Min. 8 characters"
+            autocomplete="new-password"
+          />
+          <button type="button" class="password-toggle" (click)="togglePassword()">
+            <span class="material-symbols-rounded">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+        @if (hasError('password', 'required')) { <span class="field-error">Password is required</span> }
+        @if (hasError('password', 'minlength')) { <span class="field-error">At least 8 characters</span> }
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg w-full submit-btn" [disabled]="loading()">
+        @if (loading()) {
+          <span class="spinner-sm"></span> Creating account...
+        } @else {
+          <span class="material-symbols-rounded">rocket_launch</span> Create Account
+        }
+      </button>
+    </form>
+
+    <div class="divider"><span>or</span></div>
+
+    <p class="register-link">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

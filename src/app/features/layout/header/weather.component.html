@@ -1,0 +1,19 @@
+@if (current(); as w) {
+  <div class="weather-wrap">
+
+    <!-- Badge -->
+    <span class="weather-badge">
+      <span class="material-icons weather-icon">{{ w.icon }}</span>
+      <span class="badge-label">WEATHER</span>
+    </span>
+
+    <!-- Content -->
+    <div class="weather-content" [class.visible]="visible()">
+      <span class="city-name">{{ w.city }}</span>
+      <span class="temp-value">{{ tempStr() }}</span>
+      <span class="condition-label">{{ w.condition }}</span>
+    </div>
+
+  </div>
+}
+

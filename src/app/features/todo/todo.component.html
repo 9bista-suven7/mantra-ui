@@ -1,0 +1,106 @@
+<div class="todo-page">
+
+  <!-- ── Card 1: Task list (TOP) ──────────────────────────── -->
+  <div class="panel tasks-panel">
+    <div class="panel-header">
+      <span class="material-icons panel-icon">checklist</span>
+      <h2 class="panel-title">My Tasks</h2>
+      <span class="panel-sub">{{ pending().length }} to do &bull; {{ done().length }} done</span>
+    </div>
+
+  @if (loading()) {
+    <div class="loading-center"><div class="spinner"></div></div>
+  } @else {
+
+    <!-- ── Pending tasks ─────────────────────────────────── -->
+    @if (pending().length) {
+      <section class="task-section">
+        <h3 class="section-label">
+          <span class="material-icons">pending_actions</span>
+          To Do
+          <span class="count-pill">{{ pending().length }}</span>
+        </h3>
+        <ul class="task-list">
+          @for (t of pending(); track t.id) {
+            <li class="task-item">
+              <button class="check-btn" (click)="toggle(t)" title="Mark done">
+                <span class="material-icons">radio_button_unchecked</span>
+              </button>
+              <span class="task-title">{{ t.title }}</span>
+              <span class="task-date">{{ t.createdAt | date:'MMM d' }}</span>
+              <button class="del-btn" (click)="delete(t.id)" title="Delete">
+                <span class="material-icons">close</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    <!-- ── Completed tasks ──────────────────────────────── -->
+    @if (done().length) {
+      <section class="task-section task-section--done">
+        <h3 class="section-label">
+          <span class="material-icons">check_circle_outline</span>
+          Completed
+          <span class="count-pill count-pill--done">{{ done().length }}</span>
+        </h3>
+        <ul class="task-list">
+          @for (t of done(); track t.id) {
+            <li class="task-item task-item--done">
+              <button class="check-btn check-btn--done" (click)="toggle(t)" title="Mark incomplete">
+                <span class="material-icons">check_circle</span>
+              </button>
+              <span class="task-title">{{ t.title }}</span>
+              <span class="task-date">Added {{ t.createdAt | date:'MMM d' }}</span>
+              <button class="del-btn" (click)="delete(t.id)" title="Delete">
+                <span class="material-icons">close</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (!pending().length && !done().length) {
+      <div class="empty-state">
+        <span class="material-icons">task_alt</span>
+        <p>No tasks yet. Add one above!</p>
+      </div>
+    }
+
+  }
+
+  </div><!-- /.tasks-panel -->
+
+  <!-- ── Card 2: Add task (BOTTOM) ─────────────────────────── -->
+  <div class="panel add-panel">
+    <div class="panel-header">
+      <span class="material-icons panel-icon">add_task</span>
+      <h2 class="panel-title">New Task</h2>
+    </div>
+    <div class="add-row">
+      <button class="emoji-toggle-btn" (click)="showEmoji.set(!showEmoji())" title="Add emoji" type="button">😊</button>
+      <input
+        #addInput
+        class="add-input"
+        placeholder="What needs to be done? Press Enter to add…"
+        [ngModel]="newTitle()"
+        (ngModelChange)="newTitle.set($event)"
+        (keydown)="onEnter($event)"
+        autofocus
+      />
+      <button class="add-btn" (click)="addTask()" [disabled]="!newTitle().trim()" title="Add task">
+        <span class="material-icons">send</span>
+      </button>
+    </div>
+    @if (showEmoji()) {
+      <div class="emoji-grid">
+        @for (e of EMOJIS; track e) {
+          <button class="emoji-btn" (click)="insertEmoji(e)" type="button">{{ e }}</button>
+        }
+      </div>
+    }
+  </div>
+
+</div>

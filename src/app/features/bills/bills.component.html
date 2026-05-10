@@ -1,0 +1,208 @@
+<section class="bills animate-fade-slide-in">
+
+  <div class="page-header">
+    <div>
+      <h2>Bills &amp; Documents</h2>
+      <p class="text-secondary">Track all your financial obligations</p>
+    </div>
+    <button class="btn btn-primary" (click)="openForm()">
+      <span class="material-symbols-rounded">add_card</span> Add Bill
+    </button>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip glass-card">
+    <div class="summary-item">
+      <span class="material-symbols-rounded" style="color: var(--danger)">payments</span>
+      <div>
+        <p class="font-xs text-muted">Total Unpaid</p>
+        <p class="fw-700" style="color: var(--danger)">{{ formatCurrency(totalUnpaid) }}</p>
+      </div>
+    </div>
+    <div class="summary-item">
+      <span class="material-symbols-rounded" style="color: var(--success)">check_circle</span>
+      <div>
+        <p class="font-xs text-muted">Bills Paid</p>
+        <p class="fw-700" style="color: var(--success)">{{ paidCount }}</p>
+      </div>
+    </div>
+    <div class="summary-item">
+      <span class="material-symbols-rounded" style="color: var(--warning)">pending</span>
+      <div>
+        <p class="font-xs text-muted">Total Bills</p>
+        <p class="fw-700">{{ bills().length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    @for (tab of [['ALL', 'All'], ['UNPAID', 'Unpaid'], ['PAID', 'Paid'], ['OVERDUE', 'Overdue']]; track tab[0]) {
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === tab[0]"
+              (click)="filterStatus.set($any(tab[0]))">
+        {{ tab[1] }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><div class="spinner"></div></div>
+  } @else if (!filteredBills.length) {
+    <div class="empty-state">
+      <span class="empty-icon">🧾</span>
+      <p>No bills here. Keep it up!</p>
+    </div>
+  } @else {
+    <div class="bills-list">
+      @for (bill of filteredBills; track bill.id) {
+        <div class="bill-card glass-card" [class.bill-card--overdue]="isOverdue(bill)">
+          <div class="bill-icon">{{ categoryIcon(bill.category) }}</div>
+          <div class="bill-body">
+            <div class="bill-title-row">
+              <p class="fw-600">{{ bill.title }}</p>
+              <span class="badge" [ngClass]="statusBadgeClass(bill.status)">{{ bill.status }}</span>
+            </div>
+            <div class="bill-meta d-flex align-center gap-8 mt-8">
+              <span class="meta-info font-xs text-muted">{{ bill.category | titlecase }}</span>
+              @if (bill.dueDate) {
+                <span class="meta-info font-xs" [class.text-danger]="isOverdue(bill)">
+                  Due: {{ bill.dueDate | date:'MMM d, yyyy' }}
+                </span>
+              }
+              @if (bill.recurring) {
+                <span class="badge badge-info">🔄 {{ bill.recurrencePattern }}</span>
+              }
+              @if (bill.fileUrl) {
+                <a class="receipt-badge" [href]="bill.fileUrl" target="_blank" rel="noopener"
+                   title="{{ bill.fileName }}">
+                  <span class="material-symbols-rounded">
+                    {{ isImage(bill.fileUrl) ? 'image' : 'receipt_long' }}
+                  </span>
+                  Receipt
+                </a>
+              }
+            </div>
+          </div>
+          <div class="bill-amount-col">
+            <p class="bill-amount fw-700">{{ formatCurrency(bill.amount, bill.currency) }}</p>
+          </div>
+          <div class="bill-actions">
+            @if (bill.status === 'UNPAID') {
+              <button class="btn btn-sm" style="background: rgba(78,204,163,0.15); color: var(--success)" (click)="markPaid(bill.id)">
+                <span class="material-symbols-rounded">check</span> Pay
+              </button>
+            }
+            <button class="btn-icon" (click)="openForm(bill)">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            @if (bill.fileUrl) {
+              <button class="btn-icon" (click)="removeReceipt(bill.id)" title="Remove receipt"
+                      style="color: var(--warning)">
+                <span class="material-symbols-rounded">attach_file_off</span>
+              </button>
+            }
+            <button class="btn-icon" (click)="delete(bill.id)" style="color: var(--danger)">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Form modal -->
+  @if (showForm()) {
+    <div class="modal-overlay animate-fade-in" (click)="showForm.set(false)">
+      <div class="modal glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editId() ? 'Edit Bill' : 'Add Bill' }}</h3>
+          <button class="btn-icon" (click)="showForm.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="field-group">
+            <label class="field-label">Title *</label>
+            <input class="input-field" formControlName="title" placeholder="e.g. Netflix Subscription" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Amount *</label>
+              <input class="input-field" type="number" formControlName="amount" placeholder="0.00" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Currency</label>
+              <app-custom-select
+                formControlName="currency"
+                [options]="currencyOptions"
+                placeholder="Select currency"></app-custom-select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Category *</label>
+              <app-custom-select
+                formControlName="category"
+                [options]="categoryOptions"
+                placeholder="Select category"></app-custom-select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Due Date</label>
+              <input class="input-field" type="date" formControlName="dueDate" />
+            </div>
+          </div>
+          <div class="field-group recurring-row">
+            <label class="field-label toggle-label">
+              <input type="checkbox" formControlName="recurring" />
+              <span>Recurring Bill</span>
+            </label>
+          </div>
+          @if (form.value.recurring) {
+            <div class="field-group">
+              <label class="field-label">Recurrence Pattern</label>
+              <app-custom-select
+                formControlName="recurrencePattern"
+                [options]="recurrenceOptions"
+                placeholder="Select pattern"></app-custom-select>
+            </div>
+          }
+          <!-- ── Receipt / Photo upload ──────────────────────────────── -->
+          <div class="field-group">
+            <label class="field-label">Receipt / Photo</label>
+            @if (!stagedFile()) {
+              <label class="receipt-drop-zone" for="receipt-input">
+                <span class="material-symbols-rounded" style="font-size:1.6rem;opacity:0.5">upload_file</span>
+                <span>Click to attach a photo or PDF</span>
+                <input id="receipt-input" type="file"
+                       accept="image/*,application/pdf"
+                       style="display:none"
+                       (change)="onFileSelect($event)" />
+              </label>
+            } @else {
+              <div class="receipt-preview">
+                @if (stagedPreview()) {
+                  <img [src]="stagedPreview()" alt="Receipt preview" class="receipt-thumb" />
+                } @else {
+                  <div class="receipt-file-icon">
+                    <span class="material-symbols-rounded">description</span>
+                    <span class="font-xs">{{ stagedFile()!.name }}</span>
+                  </div>
+                }
+                <button type="button" class="btn-icon receipt-clear" (click)="clearStagedFile()"
+                        title="Remove">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="showForm.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</section>

@@ -1,0 +1,364 @@
+/* -- Animated border custom property ----------------------- */
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border {
+  to { --border-angle: 360deg; }
+}
+
+/* -- Full-page host & background --------------------------- */
+:host {
+  display: block;
+  height: 100%;
+}
+
+.todo-page {
+  min-height: 100%;
+  /* instant dark color shows while image loads */
+  background-color: #0a0828;
+  background-image:
+    linear-gradient(160deg, rgba(8,6,36,0.80) 0%, rgba(18,12,55,0.72) 100%),
+    url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop&q=60');
+  background-position: center 35%;
+  background-size: cover;
+  background-attachment: local;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 36px 16px 60px;
+  box-sizing: border-box;
+}
+
+/* -- Shared panel (card) ----------------------------------- */
+.panel {
+  width: 100%;
+  max-width: 540px;
+  border-radius: 16px;
+  padding: 18px 20px 20px;
+  box-sizing: border-box;
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 2px solid transparent;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* tasks-panel: no animation, clean static dark-glass with soft purple border */
+.tasks-panel {
+  background:
+    linear-gradient(rgba(12, 9, 48, 0.85), rgba(12, 9, 48, 0.85)) padding-box,
+    linear-gradient(135deg, #6C63FF, #4ECCA3) border-box;
+}
+
+/* add-panel: diagonal green→blue border only, dark interior, no spin */
+.add-panel {
+  background:
+    linear-gradient(rgba(12, 9, 48, 0.85), rgba(12, 9, 48, 0.85)) padding-box,
+    linear-gradient(135deg, #4ECCA3 0%, #6C63FF 100%) border-box;
+}
+
+/* -- Panel header ------------------------------------------ */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.panel-icon {
+  font-size: 1.4rem;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+
+.panel-sub {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.38);
+  white-space: nowrap;
+}
+
+/* -- Add row (inside add-panel) ---------------------------- */
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+.add-row:focus-within {
+  border-color: rgba(108, 99, 255, 0.6);
+}
+
+.add-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  color: #f1f5f9;
+}
+.add-input::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.add-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #a78bfa;
+  padding: 2px;
+  border-radius: 6px;
+  display: flex;
+  flex-shrink: 0;
+  transition: color 0.15s, transform 0.15s;
+}
+.add-btn:disabled { opacity: 0.2; cursor: default; }
+.add-btn:not(:disabled):hover { transform: scale(1.18); color: #c4b5fd; }
+.add-btn .material-icons { font-size: 1.1rem; }
+
+/* ── Emoji toggle button ─────────────────────────────────── */
+.emoji-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 4px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.emoji-toggle-btn:hover { opacity: 1; transform: scale(1.2); }
+
+/* ── Emoji grid ──────────────────────────────────────────── */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.emoji-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px;
+  border-radius: 6px;
+  text-align: center;
+  line-height: 1;
+  transition: background 0.1s, transform 0.1s;
+}
+.emoji-btn:hover {
+  background: rgba(108, 99, 255, 0.2);
+  transform: scale(1.25);
+}
+
+/* -- Section inside tasks-panel ---------------------------- */
+.task-section { margin-bottom: 18px; }
+.task-section:last-child { margin-bottom: 0; }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: rgba(255, 255, 255, 0.32);
+  margin-bottom: 8px;
+}
+.section-label .material-icons { font-size: 0.85rem; color: #a78bfa; }
+.task-section--done .section-label .material-icons { color: #4ECCA3; }
+
+.count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(108, 99, 255, 0.22);
+  color: #a78bfa;
+  font-size: 0.63rem;
+  font-weight: 700;
+}
+.count-pill--done {
+  background: rgba(78, 204, 163, 0.15);
+  color: #4ECCA3;
+}
+
+/* -- Task list --------------------------------------------- */
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.task-item:hover {
+  background: rgba(108, 99, 255, 0.13);
+  border-color: rgba(108, 99, 255, 0.32);
+  transform: translateX(2px);
+}
+.task-item--done { opacity: 0.45; }
+
+/* Checkmark button */
+.check-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.28);
+  display: flex;
+  transition: color 0.15s, transform 0.15s;
+}
+.check-btn:hover { transform: scale(1.2); color: #a78bfa; }
+.check-btn--done { color: #4ECCA3; }
+.check-btn .material-icons { font-size: 1.15rem; }
+
+/* Title */
+.task-title {
+  flex: 1;
+  font-size: 0.84rem;
+  color: #e2e8f0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-item--done .task-title {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* Date */
+.task-date {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.22);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Delete */
+.del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.18);
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.task-item:hover .del-btn { opacity: 1; }
+.del-btn:hover { color: #FF6584; }
+.del-btn .material-icons { font-size: 0.9rem; }
+
+/* -- Loading / Empty --------------------------------------- */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 28px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  color: rgba(255, 255, 255, 0.28);
+  text-align: center;
+  font-size: 0.8rem;
+}
+.empty-state .material-icons {
+  font-size: 2rem;
+  color: rgba(108, 99, 255, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+══════════════════════════════════════════════════════════════ */
+:host-context(html.light-mode) .todo-page {
+  background-color: var(--bg-base);
+  background-image: none;
+}
+
+:host-context(html.light-mode) .tasks-panel {
+  background:
+    linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+    linear-gradient(135deg, #6C63FF, #4ECCA3) border-box;
+  box-shadow: var(--shadow-md);
+}
+:host-context(html.light-mode) .add-panel {
+  background:
+    linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+    linear-gradient(135deg, #4ECCA3 0%, #6C63FF 100%) border-box;
+  box-shadow: var(--shadow-md);
+}
+
+:host-context(html.light-mode) .panel-header { border-bottom-color: var(--border); }
+:host-context(html.light-mode) .panel-title { color: var(--text-primary); }
+:host-context(html.light-mode) .panel-sub { color: var(--text-secondary); }
+:host-context(html.light-mode) .section-label { color: var(--text-secondary); }
+
+:host-context(html.light-mode) .add-row {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:host-context(html.light-mode) .add-input { color: var(--text-primary); }
+:host-context(html.light-mode) .add-input::placeholder { color: var(--text-muted); }
+
+:host-context(html.light-mode) .emoji-grid {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+:host-context(html.light-mode) .task-item {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:host-context(html.light-mode) .task-title { color: var(--text-primary); }
+:host-context(html.light-mode) .task-item--done .task-title { color: var(--text-muted); }
+:host-context(html.light-mode) .task-date { color: var(--text-muted); }
+:host-context(html.light-mode) .check-btn { color: var(--text-muted); }
+:host-context(html.light-mode) .del-btn { color: var(--text-muted); }
+
+:host-context(html.light-mode) .empty-state { color: var(--text-secondary); }

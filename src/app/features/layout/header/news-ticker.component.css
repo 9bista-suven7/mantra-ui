@@ -1,0 +1,87 @@
+.ticker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.ticker-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #6C63FF, #9333EA);
+  border-radius: 6px;
+  padding: 2px 8px;
+  transition: background 0.3s ease;
+  color: #fff;
+}
+
+.ticker-label .material-icons {
+  font-size: 0.8rem;
+}
+
+.ticker-label.sports-label {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+}
+
+.ticker-label.intl-label {
+  background: linear-gradient(135deg, #0277bd, #26c6da);
+}
+
+.label-text {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.ticker-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.ticker-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ticker-content:hover .ticker-title {
+  color: #9b8ffa;
+}
+
+.ticker-source {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #6C63FF;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ticker-title {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+  font-family: 'Inter', sans-serif;
+}

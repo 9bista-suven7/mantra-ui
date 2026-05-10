@@ -1,0 +1,87 @@
+<div class="scroll-container" #scrollContainer (scroll)="onScroll($event)">
+
+  <!-- Load more / spinner -->
+  @if (loading()) {
+    <div class="load-spinner">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  @if (hasMore() && !loading()) {
+    <button class="load-more-btn" (click)="loadMore.emit()">Load earlier messages</button>
+  }
+
+  <!-- Messages -->
+  @for (msg of messages(); track msg.id; let i = $index) {
+    <!-- Date divider -->
+    @if (showDateDivider(messages(), i)) {
+      <div class="date-divider">
+        <span>{{ formatDate(msg.createdAt) }}</span>
+      </div>
+    }
+
+    <div class="message-row" [class.own]="isOwn(msg)">
+      <!-- Avatar for other user -->
+      @if (!isOwn(msg)) {
+        <div class="msg-avatar" [style.background-color]="msg.senderAvatarColor || '#607D8B'">
+          <span>{{ (msg.senderDisplayName ?? 'U').slice(0,2).toUpperCase() }}</span>
+        </div>
+      }
+
+      <div class="bubble-wrap" [class.own]="isOwn(msg)">
+        <!-- Sender name label -->
+        @if (isOwn(msg)) {
+          <span class="sender-name own-label">You</span>
+        } @else if (msg.senderDisplayName) {
+          <span class="sender-name">{{ msg.senderDisplayName }}</span>
+        }
+
+        <!-- Bubble -->
+        <div class="bubble" [class.own]="isOwn(msg)" [class.deleted]="msg.deleted" [class.system]="msg.type === 'SYSTEM'">
+
+          @if (msg.deleted) {
+            <span class="deleted-text">This message was deleted</span>
+          } @else if (msg.type === 'SYSTEM') {
+            <span class="system-text">{{ msg.content }}</span>
+          } @else if (msg.type === 'IMAGE' && msg.attachment) {
+            <img class="attachment-img" [src]="msg.attachment.url" [alt]="msg.attachment.originalName" loading="lazy" />
+            @if (msg.content) {
+              <p class="bubble-text">{{ msg.content }}</p>
+            }
+          } @else if (msg.type === 'FILE' && msg.attachment) {
+            @if (isAudio(msg.attachment)) {
+              <audio class="audio-attachment" [src]="msg.attachment.url" controls preload="metadata"></audio>
+            } @else {
+              <a class="file-attachment" [href]="msg.attachment.url" target="_blank" rel="noopener noreferrer">
+                <span class="material-icons file-icon">attach_file</span>
+                <span class="file-name">{{ msg.attachment.originalName }}</span>
+              </a>
+            }
+          } @else {
+            <p class="bubble-text">{{ msg.editedContent ?? msg.content }}</p>
+            @if (msg.editedContent) {
+              <span class="edited-label">edited</span>
+            }
+          }
+
+          <!-- Time + status -->
+          <div class="bubble-meta">
+            <span class="bubble-time">{{ formatTime(msg.createdAt) }}</span>
+            @if (isOwn(msg) && msg.type !== 'SYSTEM') {
+              <span class="material-icons status-icon" [class.read]="msg.status === 'READ'">
+                {{ statusIcon(msg) }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (messages().length === 0 && !loading()) {
+    <div class="empty-msgs">
+      <span class="material-icons">chat</span>
+      <p>No messages yet. Say hello!</p>
+    </div>
+  }
+</div>

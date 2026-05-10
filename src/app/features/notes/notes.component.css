@@ -1,0 +1,218 @@
+/* ── Page wrapper ───────────────────────────────────────────── */
+.notes { max-width: 100%; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-header h2 { margin-bottom: 4px; }
+
+.loading-center { display: flex; justify-content: center; padding: 60px; }
+
+/* ── Sticky board canvas ────────────────────────────────────── */
+.sticky-board {
+  position: relative;
+  width: 100%;
+  min-height: 72vh;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid rgba(255,255,255,0.055);
+  background-color: rgba(255,255,255,0.015);
+  /* Subtle dot-grid corkboard feel */
+  background-image: radial-gradient(circle, rgba(255,255,255,0.065) 1px, transparent 1px);
+  background-size: 28px 28px;
+  /* allow cards to overflow the board so the page can scroll */
+  overflow: visible;
+}
+
+/* ── Sticky card ────────────────────────────────────────────── */
+.sticky-card {
+  position: absolute;
+  width: 240px;
+  min-height: 160px;
+  border-radius: 3px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Layered shadows for depth */
+  box-shadow:
+    2px 2px 0 rgba(0,0,0,0.06),
+    4px 6px 18px rgba(0,0,0,0.28),
+    0 1px 0 rgba(255,255,255,0.12) inset;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  z-index: 1;
+  animation: stickyIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes stickyIn {
+  from { opacity: 0; transform: scale(0.82) rotate(-4deg); }
+  to   { opacity: 1; }
+}
+
+.sticky-card:hover {
+  z-index: 10;
+  box-shadow:
+    6px 10px 32px rgba(0,0,0,0.40),
+    0 1px 0 rgba(255,255,255,0.12) inset;
+}
+
+.sticky-card.is-dragging {
+  z-index: 200;
+  box-shadow:
+    16px 24px 48px rgba(0,0,0,0.55),
+    0 1px 0 rgba(255,255,255,0.15) inset;
+  cursor: grabbing;
+}
+
+/* Pin highlight */
+.sticky-card.is-pinned::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+
+/* ── Drag handle (top strip) ────────────────────────────────── */
+.card-handle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px 4px;
+  cursor: grab;
+  background: rgba(0,0,0,0.07);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  flex-shrink: 0;
+  user-select: none;
+}
+.card-handle:active { cursor: grabbing; }
+
+.handle-icon { font-size: 0.95rem; opacity: 0.45; }
+.pin-icon    { font-size: 0.85rem; opacity: 0.55; }
+
+/* ── Card body ──────────────────────────────────────────────── */
+.card-body {
+  padding: 12px 14px 8px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.card-title {
+  font-size: 0.87rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 7px;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.card-text {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  word-break: break-word;
+  font-family: 'Inter', sans-serif;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.card-tag {
+  font-size: 0.62rem;
+  font-family: 'Inter', sans-serif;
+  background: rgba(0,0,0,0.08);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.card-date {
+  font-size: 0.63rem;
+  font-family: 'Inter', sans-serif;
+  text-align: right;
+  opacity: 0.6;
+}
+
+/* ── Action bar (revealed on hover) ────────────────────────── */
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 4px 8px 6px;
+  background: rgba(0,0,0,0.055);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+.sticky-card:hover .card-actions { opacity: 1; }
+
+.card-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.45;
+  padding: 3px 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.15s, background 0.15s;
+}
+.card-btn:hover           { opacity: 0.9; background: rgba(0,0,0,0.10); }
+.card-btn--delete:hover   { color: #dc2626; opacity: 1 !important; }
+.card-btn .material-symbols-rounded { font-size: 0.95rem; }
+
+/* ── Color picker ───────────────────────────────────────────── */
+.color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.color-swatch:hover { transform: scale(1.18); }
+.color-swatch--active { border-color: var(--primary-light) !important; transform: scale(1.18); }
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}:host-context(html.light-mode) .modal-overlay {
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(6px) saturate(1.1);
+}.modal { width: 100%; max-width: 460px; padding: 18px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-header h3 { font-size: 0.95rem; }
+.field-group  { margin-bottom: 10px; }
+.field-label  {
+  display: block;
+  font-size: 0.65rem; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.modal .input-field {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.modal-actions .btn { padding: 6px 14px; font-size: 0.78rem; }
+textarea.input-field { resize: vertical; min-height: 80px; }
+
+/* ── Light-mode overrides ───────────────────────────────────── */
+:host-context(html.light-mode) .sticky-board {
+  border-color: rgba(0,0,0,0.07);
+  background-color: rgba(0,0,0,0.018);
+  background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1px, transparent 1px);
+}
+

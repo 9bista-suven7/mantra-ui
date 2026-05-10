@@ -1,0 +1,17 @@
+@if (current(); as item) {
+  <div class="ticker-wrap">
+    <span class="ticker-label" [class.sports-label]="badge().cls === 'sports-label'" [class.intl-label]="badge().cls === 'intl-label'">
+      <span class="material-icons">{{ badge().icon }}</span>
+      <span class="label-text">{{ badge().label }}</span>
+    </span>
+    <button
+      class="ticker-content"
+      [class.visible]="visible()"
+      (click)="openArticle()"
+      title="Open article"
+    >
+      <span class="ticker-source">{{ item.source }}</span>
+      <span class="ticker-title">{{ item.title }}</span>
+    </button>
+  </div>
+}

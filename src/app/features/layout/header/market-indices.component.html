@@ -1,0 +1,23 @@
+@if (current(); as idx) {
+  <div class="market-wrap">
+
+    <!-- Exchange badge -->
+    <span class="market-badge">
+      <span class="material-icons market-icon">show_chart</span>
+      <span class="badge-label">MARKET</span>
+    </span>
+
+    <!-- Index content -->
+    <div class="market-content" [class.visible]="visible()">
+      <span class="idx-name">{{ idx.name }}</span>
+      <span class="idx-price">{{ priceStr() }}</span>
+      <span class="idx-change" [class.up]="isUp()" [class.down]="!isUp()">
+        <span class="material-icons arrow-icon">
+          {{ isUp() ? 'arrow_drop_up' : 'arrow_drop_down' }}
+        </span>
+        <span class="change-pct">{{ changePctStr() }}</span>
+      </span>
+    </div>
+
+  </div>
+}

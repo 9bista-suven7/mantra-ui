@@ -1,0 +1,136 @@
+<div class="converter-page">
+
+  <!-- ── GRID VIEW (no tool selected) ─────────────────────── -->
+  @if (!activeTool()) {
+    <header class="page-header">
+      <span class="material-icons header-icon">transform</span>
+      <div>
+        <h1>Converter</h1>
+        <p>Word ↔ PDF · Image ↔ PDF · Split · Merge</p>
+      </div>
+    </header>
+
+    <div class="tool-grid">
+      @for (tool of tools; track tool.id) {
+        <button
+          class="tool-card"
+          [style.--card-gradient]="tool.gradient"
+          (click)="select(tool)">
+          <span class="material-icons tool-icon" [ngClass]="tool.animClass">{{ tool.icon }}</span>
+          <span class="tool-title">{{ tool.title }}</span>
+          <span class="tool-desc">{{ tool.desc }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ── DETAIL VIEW (tool selected) ──────────────────────── -->
+  @if (activeTool(); as tool) {
+    <div class="detail-view">
+
+      <!-- Back button -->
+      <button class="back-btn" (click)="back()">
+        <span class="material-icons">arrow_back_ios</span>
+        All converters
+      </button>
+
+      <!-- Tool heading -->
+      <div class="detail-header" [style.--tool-gradient]="tool.gradient">
+        <span class="material-icons detail-icon" [ngClass]="tool.animClass">{{ tool.icon }}</span>
+        <div>
+          <h2>{{ tool.title }}</h2>
+          <p>{{ tool.desc }}</p>
+        </div>
+      </div>
+
+      <!-- Drag-and-drop zone -->
+      <label
+        class="drop-zone"
+        [class.drag-active]="isDragOver()"
+        [style.--tool-gradient]="tool.gradient"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)">
+
+        <input
+          type="file"
+          style="display:none"
+          [accept]="tool.accept"
+          [multiple]="tool.multiple"
+          (change)="onFiles($event)" />
+
+        <span class="material-icons drop-upload-icon">cloud_upload</span>
+        <span class="drop-primary">Drop {{ tool.multiple ? 'files' : 'file' }} here</span>
+        <span class="drop-secondary">or <u>browse</u> · {{ tool.accept }}</span>
+      </label>
+
+      <!-- Selected file list -->
+      @if (selectedFiles().length) {
+        <ul class="file-list">
+          @for (f of selectedFiles(); track f.name; let i = $index) {
+            <li class="file-item">
+              <span class="material-icons file-icon">insert_drive_file</span>
+              <span class="file-name">{{ f.name }}</span>
+              <span class="file-size">{{ (f.size / 1024).toFixed(0) }} KB</span>
+              <button class="file-remove" (click)="removeFile(i)" type="button">
+                <span class="material-icons">close</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      <!-- Error -->
+      @if (error()) {
+        <p class="error-msg">
+          <span class="material-icons">error_outline</span>
+          {{ error() }}
+        </p>
+      }
+
+      <!-- Extra params (password, watermark text, page range …) -->
+      @if (activeTool()?.params?.length) {
+        <div class="params-section">
+          @for (param of activeTool()!.params!; track param.key) {
+            <div class="param-field">
+              <label class="param-label">{{ param.label }}@if (param.required) {<span class="param-req"> *</span>}</label>
+              <input
+                class="param-input"
+                [type]="param.type"
+                [placeholder]="param.placeholder"
+                [value]="paramValues()[param.key] || ''"
+                (input)="setParam(param.key, $any($event.target).value)" />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Progress bar -->
+      @if (converting()) {
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" [style.--tool-gradient]="tool.gradient" [style.width.%]="progress()"></div>
+          </div>
+          <span class="progress-pct">{{ progress() }}%</span>
+        </div>
+      }
+
+      <!-- Convert button -->
+      <button
+        class="convert-btn"
+        [style.--tool-gradient]="tool.gradient"
+        [disabled]="!selectedFiles().length || converting() || !paramsReady()"
+        (click)="convert()">
+        @if (converting()) {
+          <span class="material-icons spin">autorenew</span>
+          Converting…
+        } @else {
+          <span class="material-icons">auto_fix_high</span>
+          {{ tool.actionLabel }}
+        }
+      </button>
+
+    </div>
+  }
+
+</div>

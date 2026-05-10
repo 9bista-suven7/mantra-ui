@@ -1,0 +1,132 @@
+/* ── Host ───────────────────────────────────────────────────── */
+:host {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ── Outer wrap ─────────────────────────────────────────────── */
+.scores-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  width: 100%;
+  max-width: none;
+}
+
+/* ── Sport/League badge ─────────────────────────────────────── */
+.scores-label {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0f4c1e, #1a7a32);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: #fff;
+}
+
+.sport-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.label-league {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+
+/* ── Scores content (fades in/out on cycle) ─────────────────── */
+.scores-content {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.scores-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Live pulsing dot ───────────────────────────────────────── */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+  animation: pulse-live 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1);    box-shadow: 0 0 0 0 rgba(76,175,80,.5); }
+  50%       { opacity: .7; transform: scale(1.2); box-shadow: 0 0 0 4px rgba(76,175,80,0); }
+}
+
+/* ── Team abbreviations ─────────────────────────────────────── */
+.abbr {
+  font-size: 0.63rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ── Scores ─────────────────────────────────────────────────── */
+.score {
+  font-size: 0.7rem;
+  font-weight: 800;
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgba(255,255,255,0.6);
+  min-width: 14px;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.score.leading {
+  color: #7dd3fc; /* soft blue for the leading score */
+}
+
+/* ── Dash separator ─────────────────────────────────────────── */
+.sep {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.25);
+  margin: 0 1px;
+}
+
+/* ── Status badge ───────────────────────────────────────────── */
+.status-badge {
+  font-size: 0.55rem;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgba(255,255,255,0.32);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+.status-badge.live-status {
+  color: #4caf50;
+}
+
+/* ── Light-mode overrides ───────────────────────────────────── */
+:host-context(html.light-mode) .abbr   { color: rgba(30,30,30,0.75); }
+:host-context(html.light-mode) .score  { color: rgba(30,30,30,0.55); }
+:host-context(html.light-mode) .score.leading { color: #0369a1; }
+:host-context(html.light-mode) .sep    { color: rgba(30,30,30,0.25); }
+:host-context(html.light-mode) .status-badge { color: rgba(30,30,30,0.38); }
+:host-context(html.light-mode) .status-badge.live-status { color: #2e7d32; }

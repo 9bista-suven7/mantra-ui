@@ -1,0 +1,157 @@
+<div class="window">
+  <!-- Header -->
+  <div class="window-header">
+    <div class="header-left">
+      <div class="header-avatar">
+        {{ headerName().slice(0,2).toUpperCase() }}
+      </div>
+      <div class="header-info">
+        <span class="header-name">{{ headerName() }}</span>
+        <span class="header-sub" [class.online]="headerOnline()">
+          @if (headerOnline()) { <span class="online-dot"></span> }
+          {{ headerSub() }}
+        </span>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (target().kind === 'group') {
+        <button class="icon-btn" title="Chat info" (click)="toggleInfo()">
+          <span class="material-icons">info_outline</span>
+        </button>
+      }
+      <button
+        class="icon-btn header-delete-btn"
+        [title]="target().kind === 'group' ? 'Leave group' : 'Remove chat'"
+        (click)="requestDelete()">
+        <span class="material-icons">delete_outline</span>
+      </button>
+    </div>
+  </div>
+
+  @if (showInfo()) {
+    <div class="info-backdrop" (click)="closeInfo()">
+      <aside class="info-panel" (click)="$event.stopPropagation()">
+        @if (target(); as t) {
+          <div class="info-head">
+            <div class="info-avatar">{{ headerName().slice(0,2).toUpperCase() }}</div>
+            <div class="info-title">
+              <h3>{{ headerName() }}</h3>
+              <span class="info-sub">{{ headerSub() }}</span>
+            </div>
+            <button class="icon-btn info-close" (click)="closeInfo()">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+
+          @if (t.kind === 'group') {
+            @if (t.data.description) {
+              <section class="info-section">
+                <h4>Description</h4>
+                <p>{{ t.data.description }}</p>
+              </section>
+            }
+            @if (t.linkedExpenseGroupId) {
+              <section class="info-section">
+                <h4>Linked to</h4>
+                <a class="info-link" routerLink="/app/expenses">
+                  <span class="material-icons">payments</span>
+                  Splitwise expense group
+                  <span class="material-icons">open_in_new</span>
+                </a>
+              </section>
+            }
+            <section class="info-section">
+              <h4>Members ({{ t.data.members.length }})</h4>
+              <ul class="info-members">
+                @for (m of t.data.members; track m.userId) {
+                  <li class="info-member">
+                    <div
+                      class="info-mem-avatar"
+                      [style.background]="'#6C63FF'">
+                      {{ m.displayName.slice(0,2).toUpperCase() }}
+                    </div>
+                    <div class="info-mem-text">
+                      <span class="info-mem-name">
+                        {{ m.displayName }}
+                        @if (m.userId === currentUserId()) { <span class="info-mem-you">(you)</span> }
+                      </span>
+                      <span class="info-mem-meta">
+                        @if (m.role === 'ADMIN') { <span class="info-role-badge">Admin</span> }
+                        Joined {{ formatJoinedDate(m.joinedAt) }}
+                      </span>
+                    </div>
+                    <span class="info-mem-status">&nbsp;</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          } @else {
+            <section class="info-section">
+              <h4>About</h4>
+              <p class="info-line">
+                <span class="material-icons">alternate_email</span>
+                {{ t.data.otherUser.email }}
+              </p>
+              <p class="info-line">
+                <span class="material-icons">circle</span>
+                {{ t.data.otherUserOnline ? 'Online now' : 'Offline' }}
+              </p>
+            </section>
+          }
+        }
+      </aside>
+    </div>
+  }
+
+  <!-- Pinned Splitwise balances -->
+  @if (balances(); as b) {
+    <div class="pinned-balances">
+      <div class="pin-head">
+        <span class="material-icons pin-icon">push_pin</span>
+        <span class="pin-title">Splitwise Balances</span>
+        <a class="pin-link" routerLink="/app/expenses">
+          Open <span class="material-icons">open_in_new</span>
+        </a>
+      </div>
+      @if (b.suggestions && b.suggestions.length > 0) {
+        <div class="pin-rows">
+          @for (s of b.suggestions; track s.fromUserId + '-' + s.toUserId) {
+            <div class="pin-row">
+              <span class="pin-from">{{ s.fromDisplayName }}</span>
+              <span class="material-icons pin-arrow">arrow_forward</span>
+              <span class="pin-to">{{ s.toDisplayName }}</span>
+              <strong class="pin-amt">{{ b.currency }} {{ s.amount | number:'1.2-2' }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="pin-empty">All settled up 🎉</div>
+      }
+    </div>
+  }
+
+  <!-- Message list -->
+  <app-message-list
+    [messages]="messages()"
+    [currentUserId]="currentUserId()"
+    [loading]="loading()"
+    [hasMore]="hasMore()"
+    (loadMore)="loadMore()" />
+
+  <!-- Typing indicator -->
+  @if (typingUsers().length > 0) {
+    <div class="typing-indicator">
+      <span class="typing-dots"><span></span><span></span><span></span></span>
+      <span class="typing-text">
+        {{ typingUsers().join(', ') }} {{ typingUsers().length > 1 ? 'are' : 'is' }} typing...
+      </span>
+    </div>
+  }
+
+  <!-- Input -->
+  <app-message-input
+    [sending]="sending()"
+    (messageSent)="sendMessage($event)"
+    (typingStart)="onTypingStart()"
+    (typingStop)="onTypingStop()" />
+</div>

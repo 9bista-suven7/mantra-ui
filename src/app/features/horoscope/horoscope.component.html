@@ -1,0 +1,71 @@
+<section class="horo-page">
+  <div class="page-head">
+    <a routerLink="/app/dashboard" class="back-link">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Dashboard
+    </a>
+    <h1>Horoscope</h1>
+    <span class="today-badge">{{ 'today' | titlecase }} · {{ today() | date:'MMM d, y' }}</span>
+  </div>
+
+  <!-- No birth date set: gentle prompt -->
+  @if (!birthDate()) {
+    <div class="no-dob-card glass-card">
+      <span class="material-symbols-rounded no-dob-icon">stars</span>
+      <h2>Set your birth date to personalize your horoscope</h2>
+      <p>We could not find your birth date in your profile. Add it in Settings to highlight your zodiac sign here, or browse all 12 zodiacs below.</p>
+      <a class="btn btn-primary" routerLink="/app/settings">
+        <span class="material-symbols-rounded">tune</span>
+        Open Settings
+      </a>
+    </div>
+  } @else if (selectedRow(); as r) {
+    <!-- Detail of selected (default = user's own) zodiac -->
+    <div id="horo-detail" class="detail-card glass-card"
+         [class.detail-card--mine]="myZodiac()?.sign === r.sign">
+      <div class="detail-head">
+        <span class="detail-emoji">{{ r.emoji }}</span>
+        <div class="detail-stack">
+          <h2>{{ r.sign | titlecase }}</h2>
+          <span class="detail-range">{{ r.dateRange }}</span>
+          @if (myZodiac()?.sign === r.sign) {
+            <span class="mine-tag">Your sign</span>
+          }
+        </div>
+      </div>
+      @if (r.loading) {
+        <p class="detail-text muted">Loading today's reading…</p>
+      } @else if (!r.text) {
+        <p class="detail-text muted">Could not load horoscope. Please try again later.</p>
+      } @else {
+        <p class="detail-text">{{ r.text }}</p>
+      }
+    </div>
+  }
+
+  <!-- All 12 zodiacs as clickable cards -->
+  <h2 class="section-title">All Zodiacs</h2>
+  <p class="section-hint">Tap any sign to view its full reading for today.</p>
+  <div class="zodiac-grid">
+    @for (z of rows(); track z.sign) {
+      <button class="zodiac-card glass-card"
+              [class.zodiac-card--mine]="myZodiac()?.sign === z.sign"
+              [class.zodiac-card--active]="selectedSign() === z.sign"
+              (click)="selectSign(z.sign)">
+        <span class="z-emoji">{{ z.emoji }}</span>
+        <span class="z-sign">{{ z.sign | titlecase }}</span>
+        <span class="z-range">{{ z.dateRange }}</span>
+        @if (z.loading) {
+          <span class="z-text muted">Loading…</span>
+        } @else if (!z.text) {
+          <span class="z-text muted">Unavailable</span>
+        } @else {
+          <span class="z-text">{{ z.text }}</span>
+        }
+        @if (myZodiac()?.sign === z.sign) {
+          <span class="mine-tag">Your sign</span>
+        }
+      </button>
+    }
+  </div>
+</section>

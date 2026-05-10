@@ -1,0 +1,55 @@
+<header class="app-header">
+  <div class="header-left">
+    <span class="brand-icon material-icons">self_improvement</span>
+    <span class="live-date">{{ currentDate() }}</span>
+  </div>
+
+  <div class="header-center">
+    <div class="scores-row">
+      <app-sports-scores />
+      <div class="scores-row-divider"></div>
+      <app-market-indices />
+      <div class="scores-row-divider"></div>
+      <app-weather />
+    </div>
+    <div class="center-divider"></div>
+    <app-news-ticker />
+  </div>
+
+  <div class="header-right">
+    <!-- Theme toggle -->
+    <button
+      class="theme-toggle-btn"
+      [class.light]="theme.theme() === 'light'"
+      [title]="theme.theme() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      (click)="theme.toggle()"
+    >
+      <span class="theme-track">
+        <span class="theme-thumb">
+          <span class="material-symbols-rounded theme-icon">
+            {{ theme.theme() === 'dark' ? 'dark_mode' : 'light_mode' }}
+          </span>
+        </span>
+      </span>
+    </button>
+    <!-- Notifications -->
+    <div class="notif-wrap">
+      <button
+        class="icon-btn notif-btn"
+        title="Notifications"
+        [class.has-unread]="notifSvc.unreadCount() > 0"
+        (click)="notifSvc.togglePanel()"
+      >
+        <span class="material-icons">
+          {{ notifSvc.unreadCount() > 0 ? 'notifications' : 'notifications_none' }}
+        </span>
+        @if (notifSvc.unreadCount() > 0) {
+          <span class="notif-dot">
+            {{ notifSvc.unreadCount() > 9 ? '9+' : notifSvc.unreadCount() }}
+          </span>
+        }
+      </button>
+      <app-notification-panel />
+    </div>
+  </div>
+</header>

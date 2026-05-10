@@ -1,0 +1,217 @@
+<section class="reminders animate-fade-slide-in">
+
+  <!-- ── Hero header ─────────────────────────────────────────── -->
+  <header class="rem-hero glass-card">
+    <div class="rem-hero__bg"></div>
+
+    <div class="rem-hero__top">
+      <div class="rem-hero__title">
+        <span class="hero-icon material-symbols-rounded">notifications_active</span>
+        <div>
+          <h2>Reminders</h2>
+          <p class="text-secondary">Never miss what matters</p>
+        </div>
+      </div>
+      <button class="btn btn-primary rem-hero__cta" (click)="openForm()">
+        <span class="material-symbols-rounded">add_alert</span>
+        New Reminder
+      </button>
+    </div>
+
+    <div class="rem-stats">
+      <div class="rem-stat">
+        <span class="rem-stat__icon material-symbols-rounded" style="color:#6C63FF">inbox</span>
+        <div>
+          <div class="rem-stat__val">{{ stats().total }}</div>
+          <div class="rem-stat__lbl">Total</div>
+        </div>
+      </div>
+      <div class="rem-stat">
+        <span class="rem-stat__icon material-symbols-rounded" style="color:#FFB347">today</span>
+        <div>
+          <div class="rem-stat__val">{{ stats().today }}</div>
+          <div class="rem-stat__lbl">Today</div>
+        </div>
+      </div>
+      <div class="rem-stat">
+        <span class="rem-stat__icon material-symbols-rounded" style="color:#FF6B6B">warning</span>
+        <div>
+          <div class="rem-stat__val">{{ stats().overdue }}</div>
+          <div class="rem-stat__lbl">Overdue</div>
+        </div>
+      </div>
+      <div class="rem-stat">
+        <span class="rem-stat__icon material-symbols-rounded" style="color:#4ECCA3">check_circle</span>
+        <div>
+          <div class="rem-stat__val">{{ stats().done }}</div>
+          <div class="rem-stat__lbl">Done</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Toolbar: search + filter chips ─────────────────────── -->
+  <div class="rem-toolbar">
+    <div class="rem-search">
+      <span class="material-symbols-rounded">search</span>
+      <input type="text"
+             placeholder="Search reminders…"
+             [value]="search()"
+             (input)="onSearch($any($event.target).value)" />
+    </div>
+    <div class="rem-chips">
+      @for (f of filters; track f.key) {
+        <button class="rem-chip"
+                [class.rem-chip--active]="filter() === f.key"
+                (click)="setFilter(f.key)">
+          <span class="material-symbols-rounded">{{ f.icon }}</span>
+          {{ f.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── Body ───────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-center"><div class="spinner"></div></div>
+  } @else if (!reminders().length) {
+    <div class="rem-empty-hero glass-card">
+      <div class="rem-empty-hero__art">🔔</div>
+      <h3>No reminders yet</h3>
+      <p class="text-secondary">Create your first reminder to start staying on top of things.</p>
+      <button class="btn btn-primary mt-16" (click)="openForm()">
+        <span class="material-symbols-rounded">add_alert</span> Create Reminder
+      </button>
+    </div>
+  } @else if (!filteredReminders().length) {
+    <div class="rem-empty-hero glass-card">
+      <div class="rem-empty-hero__art">🔍</div>
+      <h3>Nothing matches</h3>
+      <p class="text-secondary">Try a different filter or search term.</p>
+    </div>
+  } @else {
+    @for (g of groupedReminders(); track g.key) {
+      <div class="rem-group">
+        <div class="rem-group__header">
+          <span class="material-symbols-rounded">{{ g.icon }}</span>
+          <h4>{{ g.label }}</h4>
+          <span class="rem-group__count">{{ g.items.length }}</span>
+        </div>
+
+        <div class="rem-grid">
+          @for (r of g.items; track r.id) {
+            <article class="rem-card glass-card"
+                     [class.rem-card--done]="r.status === 'COMPLETED'"
+                     [class.rem-card--overdue]="isOverdue(r)"
+                     [style.--prio-color]="priorityConfig(r.priority).color">
+
+              <div class="rem-card__bar"></div>
+
+              <button class="rem-check"
+                      [class.rem-check--done]="r.status === 'COMPLETED'"
+                      (click)="complete(r.id)"
+                      [title]="r.status === 'COMPLETED' ? 'Completed' : 'Mark complete'">
+                <span class="material-symbols-rounded">
+                  {{ r.status === 'COMPLETED' ? 'check_circle' : 'radio_button_unchecked' }}
+                </span>
+              </button>
+
+              <div class="rem-content">
+                <div class="rem-card__head">
+                  <h5 class="rem-card__title" [class.line-through]="r.status === 'COMPLETED'">
+                    {{ r.title }}
+                  </h5>
+                  <span class="rem-prio-pill"
+                        [style.background]="priorityConfig(r.priority).color + '22'"
+                        [style.color]="priorityConfig(r.priority).color">
+                    {{ priorityConfig(r.priority).label }}
+                  </span>
+                </div>
+
+                @if (r.description) {
+                  <p class="rem-card__desc">{{ r.description }}</p>
+                }
+
+                <div class="rem-card__meta">
+                  <span class="rem-meta-chip" [class.rem-meta-chip--overdue]="isOverdue(r)">
+                    <span class="material-symbols-rounded">schedule</span>
+                    {{ r.reminderTime | date:'EEE, MMM d · h:mm a' }}
+                  </span>
+                  <span class="rem-meta-chip rem-meta-chip--soft">
+                    <span class="material-symbols-rounded">history_toggle_off</span>
+                    {{ relativeTime(r.reminderTime) }}
+                  </span>
+                  @if (r.recurrence !== 'NONE') {
+                    <span class="rem-meta-chip rem-meta-chip--accent">
+                      <span class="material-symbols-rounded">autorenew</span>
+                      {{ r.recurrence | titlecase }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <div class="rem-card__actions">
+                <button class="rem-icon-btn" (click)="openForm(r)" title="Edit">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+                <button class="rem-icon-btn rem-icon-btn--danger"
+                        (click)="delete(r.id)" title="Delete">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ── Form modal ─────────────────────────────────────────── -->
+  @if (showForm()) {
+    <div class="modal-overlay animate-fade-in" (click)="showForm.set(false)">
+      <div class="modal glass-card animate-scale-in" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editId() ? 'Edit' : 'New' }} Reminder</h3>
+          <button class="btn-icon" (click)="showForm.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="field-group">
+            <label class="field-label">Title *</label>
+            <input class="input-field" formControlName="title" placeholder="What do you need to remember?" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <textarea class="input-field" formControlName="description" rows="2" placeholder="Additional details..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Date & Time *</label>
+            <input class="input-field" type="datetime-local" formControlName="reminderTime" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Priority</label>
+              <app-custom-select
+                formControlName="priority"
+                [options]="priorityOptions"
+                placeholder="Select priority"></app-custom-select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Recurrence</label>
+              <app-custom-select
+                formControlName="recurrence"
+                [options]="recurrenceOptions"
+                placeholder="Select recurrence"></app-custom-select>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="showForm.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</section>

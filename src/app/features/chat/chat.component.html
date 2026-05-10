@@ -1,0 +1,56 @@
+<div class="chat-root">
+  <app-chat-sidebar
+    [conversations]="conversations()"
+    [groups]="groups()"
+    [linkedGroupIds]="linkedChatGroupIds()"
+    [selectedId]="selectedTarget()?.data?.id ?? null"
+    (conversationSelected)="selectConversation($event)"
+    (groupSelected)="selectGroup($event)"
+    (conversationReady)="onConversationReady($event)"
+    (groupReady)="onGroupReady($event)"
+    (expenseGroupSelected)="onExpenseGroupSelected($event)"
+    (conversationDeleteRequested)="onDeleteConversation($event)"
+    (groupDeleteRequested)="onDeleteGroup($event)" />
+
+  <div class="chat-main">
+    @if (selectedTarget(); as target) {
+      <app-chat-window
+        [target]="target"
+        (deleteRequested)="onWindowDeleteRequested($event)" />
+    } @else {
+      <div class="empty-state">
+        <div
+          class="bg-slide"
+          [class.visible]="bgFade()"
+          [style.background-image]="'url(' + bgImages[bgIndex()] + ')'">
+        </div>
+        <div class="empty-overlay">
+          <div class="empty-glass">
+            <span class="material-icons empty-icon">chat_bubble_outline</span>
+            <p>Select a conversation to start chatting</p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (confirmDialog(); as dlg) {
+  <div class="confirm-backdrop" (click)="confirmDialogCancel()">
+    <div class="confirm-dialog" [class.danger]="dlg.danger" (click)="$event.stopPropagation()">
+      <div class="confirm-icon">
+        <span class="material-icons">{{ dlg.danger ? 'warning_amber' : 'help_outline' }}</span>
+      </div>
+      <h3 class="confirm-title">{{ dlg.title }}</h3>
+      <p class="confirm-message">{{ dlg.message }}</p>
+      <div class="confirm-actions">
+        <button class="btn-cancel" (click)="confirmDialogCancel()">
+          {{ dlg.cancelLabel || 'Cancel' }}
+        </button>
+        <button class="btn-confirm" [class.danger]="dlg.danger" (click)="confirmDialogConfirm()">
+          {{ dlg.confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

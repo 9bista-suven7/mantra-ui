@@ -1,0 +1,283 @@
+<section class="calendar-page animate-fade-slide-in">
+
+  <!-- ── Today banner (spans full width) ──────────────────────────────── -->
+  <div class="today-banner glass-card">
+    <!-- Left: today info + Today button -->
+    <div class="today-left">
+      <div class="today-main">
+        <span class="material-symbols-rounded today-icon">today</span>
+        <div>
+          <p class="today-ad">{{ todayAdLabel() }}</p>
+          <p class="today-bs">{{ todayBsLabel() }}</p>
+        </div>
+      </div>
+      <button class="btn btn-secondary today-btn" (click)="goToday()">
+        <span class="material-symbols-rounded">event_available</span>
+        Today
+      </button>
+    </div>
+
+    <!-- Right: long weekend pill -->
+    @if (nextLongWeekend(); as lw) {
+      <div class="long-weekend-pill" [title]="lw.anchorHoliday.name + ' — ' + lw.totalDays + '-day weekend'">
+        <span class="material-symbols-rounded lw-icon">beach_access</span>
+        <div class="lw-text">
+          <p class="lw-title">Next long weekend</p>
+          <p class="lw-sub">
+            {{ longWeekendLabel() }}
+            <span class="lw-days">&middot; {{ lw.totalDays }} days</span>
+            @if (longWeekendDaysAway() > 0) {
+              <span class="lw-away">&middot; in {{ longWeekendDaysAway() }} day{{ longWeekendDaysAway() === 1 ? '' : 's' }}</span>
+            }
+          </p>
+          <p class="lw-anchor">{{ lw.anchorHoliday.name }}</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ── Holidays card (spans full width) ─────────────────────────────── -->
+  <div class="holidays-card glass-card">
+    <div class="hol-head">
+      <span class="material-symbols-rounded hol-icon">flag</span>
+      <span class="hol-title">Federal Holidays &amp; Festivals</span>
+      <div class="hol-tabs">
+        <button class="hol-tab" [class.hol-tab--active]="holFilter() === 'all'" (click)="holFilter.set('all')">All</button>
+        <button class="hol-tab" [class.hol-tab--active]="holFilter() === 'US'" (click)="holFilter.set('US')">🇺🇸 USA</button>
+        <button class="hol-tab" [class.hol-tab--active]="holFilter() === 'NP'" (click)="holFilter.set('NP')">🇳🇵 Nepal</button>
+      </div>
+    </div>
+    @if (!filteredHolidays().length) {
+      <p class="hol-empty">No upcoming holidays.</p>
+    } @else {
+      <div class="hol-list">
+        @for (h of filteredHolidays(); track h.date + '|' + h.country + '|' + h.name) {
+          <div class="hol-item"
+               [class.hol-item--us]="h.country === 'US'"
+               [class.hol-item--np]="h.country === 'NP'"
+               (click)="selectDay(parseHolidayDate(h.date))">
+            <div class="hol-date">
+              <span class="hol-mon">{{ holidayMonth(h.date) }}</span>
+              <span class="hol-day">{{ holidayDay(h.date) }}</span>
+            </div>
+            <div class="hol-info">
+              <p class="hol-name">{{ h.name }}</p>
+              <p class="hol-meta">
+                {{ h.country === 'US' ? '🇺🇸' : '🇳🇵' }}
+                &middot; {{ h.isPublic ? 'Public holiday' : 'Festival' }}
+                &middot; {{ holidayWeekday(h.date) }}
+              </p>
+            </div>
+            <span class="hol-when">{{ holidayWhenLabel(h.date) }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ── Quick-ref strip (spans full width) ───────────────────────────── -->
+  <div class="ref-strip glass-card">
+    <p class="ref-title">
+      <span class="material-symbols-rounded">info</span>
+      Quick Reference
+    </p>
+    <div class="ref-grid">
+      @for (pair of [
+        {en: 'Baisakh',  ne: 'बैशाख',   ad: 'Apr – May'},
+        {en: 'Jestha',   ne: 'जेठ',     ad: 'May – Jun'},
+        {en: 'Ashadh',   ne: 'असार',    ad: 'Jun – Jul'},
+        {en: 'Shrawan',  ne: 'साउन',    ad: 'Jul – Aug'},
+        {en: 'Bhadra',   ne: 'भदौ',     ad: 'Aug – Sep'},
+        {en: 'Ashwin',   ne: 'असोज',    ad: 'Sep – Oct'},
+        {en: 'Kartik',   ne: 'कात्तिक',  ad: 'Oct – Nov'},
+        {en: 'Mangsir',  ne: 'मंसिर',   ad: 'Nov – Dec'},
+        {en: 'Poush',    ne: 'पुष',     ad: 'Dec – Jan'},
+        {en: 'Magh',     ne: 'माघ',     ad: 'Jan – Feb'},
+        {en: 'Falgun',   ne: 'फागुन',   ad: 'Feb – Mar'},
+        {en: 'Chaitra',  ne: 'चैत',     ad: 'Mar – Apr'}
+      ]; track pair.en) {
+        <div class="ref-row">
+          <span class="ref-en">{{ pair.en }}</span>
+          <span class="ref-ne">{{ pair.ne }}</span>
+          <span class="ref-ad text-secondary">{{ pair.ad }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ── Calendar card (left column) ─────────────────────────────────── -->
+  <div class="cal-card glass-card">
+
+    <div class="cal-toolbar">
+      <div class="cal-nav">
+        <button class="nav-arrow" (click)="prevMonth()">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </button>
+        <div class="cal-title-block">
+          <h3 class="cal-title">{{ headerLabel() }}</h3>
+          <p class="cal-subtitle text-secondary">{{ subLabel() }}</p>
+        </div>
+        <button class="nav-arrow" (click)="nextMonth()">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn" [class.mode-btn--active]="mode() === 'en'" (click)="setMode('en')">English</button>
+        <button class="mode-btn" [class.mode-btn--active]="mode() === 'ne'" (click)="setMode('ne')">नेपाली</button>
+      </div>
+    </div>
+
+    <!-- Weekday headers -->
+    <div class="cal-grid cal-grid--header">
+      @for (wd of weekDays(); track wd) {
+        <div class="wd-cell">{{ wd }}</div>
+      }
+    </div>
+
+    <!-- Day grid -->
+    @for (week of calWeeks(); track $index) {
+      <div class="cal-grid">
+        @for (day of week; track trackByDate($index, day)) {
+          <div
+            class="day-cell"
+            [class.day-cell--today]="day.isToday"
+            [class.day-cell--outside]="!day.inCurrentMonth"
+            [class.day-cell--sunday]="day.adDate.getDay() === 0"
+            [class.day-cell--selected]="isSelected(day)"
+            [class.day-cell--holiday]="day.holidays.length > 0"
+            [title]="day.holidays.length ? (day.holidays[0].name + (day.holidays.length > 1 ? ' (+' + (day.holidays.length - 1) + ' more)' : '')) : ''"
+            (click)="selectDay(day.adDate)"
+          >
+            <span class="day-primary">{{ primaryDay(day) }}</span>
+            @if (day.inCurrentMonth || day.isToday) {
+              <span class="day-secondary">{{ secondaryDay(day) }}</span>
+            }
+            @if (day.holidays.length) {
+              <span class="holiday-badge"
+                    [class.holiday-badge--us]="day.holidays[0].country === 'US'"
+                    [class.holiday-badge--np]="day.holidays[0].country === 'NP'">
+                {{ day.holidays[0].country === 'US' ? '🇺🇸' : '🇳🇵' }}
+              </span>
+            }
+            @if (day.events.length) {
+              <div class="event-dots">
+                @for (ev of day.events.slice(0, 3); track ev) {
+                  <span class="event-dot" [title]="ev"></span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Legend -->
+    <div class="cal-legend">
+      <span class="legend-item">
+        <span class="legend-swatch legend-swatch--primary"></span>
+        {{ mode() === 'en' ? 'AD date' : 'BS मिति' }}
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch legend-swatch--secondary"></span>
+        {{ mode() === 'en' ? 'BS date' : 'AD date' }}
+      </span>
+      <span class="legend-item">
+        <span class="event-dot"></span>
+        Reminder
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Reminders panel (right column) ───────────────────────────────── -->
+  <div class="reminders-panel glass-card">
+
+    <div class="rem-panel-header">
+      <div class="rem-panel-title">
+        <span class="material-symbols-rounded">add_alert</span>
+        Reminders
+      </div>
+      <span class="rem-date-label">{{ selectedDateLabel() }}</span>
+      <button class="btn btn-primary" style="font-size:0.68rem;padding:4px 10px" (click)="openAddForm()">
+        <span class="material-symbols-rounded" style="font-size:0.9rem">add</span>
+        Add
+      </button>
+    </div>
+
+    <!-- Add form -->
+    @if (showAddForm()) {
+      <div class="rem-form">
+        <form [formGroup]="form" (ngSubmit)="saveReminder()">
+          <div style="margin-bottom:6px">
+            <input class="input-field" style="font-size:0.72rem;padding:5px 8px"
+                   formControlName="title" placeholder="Reminder title…" />
+          </div>
+          <div style="margin-bottom:6px">
+            <input type="datetime-local" class="input-field" style="font-size:0.72rem;padding:5px 8px"
+                   formControlName="reminderTime" />
+          </div>
+          <div class="rem-form-row" style="margin-bottom:6px">
+            <select class="input-field" style="font-size:0.72rem;padding:5px 8px" formControlName="priority">
+              @for (p of priorities; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+            <select class="input-field" style="font-size:0.72rem;padding:5px 8px" formControlName="recurrence">
+              <option value="NONE">Once</option>
+              <option value="DAILY">Daily</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="MONTHLY">Monthly</option>
+            </select>
+          </div>
+          <div class="rem-form-actions">
+            <button type="button" class="btn btn-secondary" style="font-size:0.68rem;padding:4px 10px"
+                    (click)="showAddForm.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary" style="font-size:0.68rem;padding:4px 10px"
+                    [disabled]="form.invalid">Save</button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Reminders list -->
+    <div class="rem-list">
+      @if (!selectedReminders().length) {
+        <div class="rem-empty">
+          <span class="material-symbols-rounded">notifications_off</span>
+          No reminders on this day
+        </div>
+      } @else {
+        @for (r of selectedReminders(); track r.id) {
+          <div class="rem-item"
+               [class.rem-item--done]="r.status === 'COMPLETED'"
+               [class.rem-item--overdue]="isOverdue(r)">
+            <button class="rem-check" [class.rem-check--done]="r.status === 'COMPLETED'"
+                    (click)="completeReminder(r.id)">
+              <span class="material-symbols-rounded">
+                {{ r.status === 'COMPLETED' ? 'check_circle' : 'radio_button_unchecked' }}
+              </span>
+            </button>
+            <div class="rem-body">
+              <p class="rem-title" [class.line-through]="r.status === 'COMPLETED'">{{ r.title }}</p>
+              <p class="rem-time" [class.rem-time--overdue]="isOverdue(r)">
+                <span class="material-symbols-rounded">schedule</span>
+                {{ r.reminderTime | date:'h:mm a' }}
+                @if (r.recurrence !== 'NONE') { · 🔄 {{ r.recurrence | titlecase }} }
+              </p>
+            </div>
+            <span class="rem-priority"
+                  [style.background]="priorityConfig(r.priority).color + '25'"
+                  [style.color]="priorityConfig(r.priority).color">
+              {{ priorityConfig(r.priority).label }}
+            </span>
+            <button class="rem-del" (click)="deleteReminder(r.id)">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        }
+      }
+    </div>
+
+    <p class="rem-hint">Click any date to view its reminders</p>
+  </div>
+
+</section>

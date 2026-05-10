@@ -1,0 +1,120 @@
+<div class="market-page">
+  <div class="page-header">
+    <span class="material-icons page-icon">show_chart</span>
+    <div>
+      <h1 class="page-title">Market Prices</h1>
+      @if (data(); as d) {
+        <p class="page-subtitle">
+          Updated {{ d.updatedAt | date:'h:mm a' }}
+        </p>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-grid">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <span class="material-icons">cloud_off</span>
+      <p>Unable to load market data. Please try again later.</p>
+    </div>
+  } @else if (data(); as d) {
+
+    <!-- ── Currency Exchange Rates ──────────────────────────── -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">
+          <span class="material-icons">currency_exchange</span>
+          Currency vs USD
+        </h2>
+        <div class="currency-chips">
+          @for (c of d.currencies; track c.code) {
+            <button
+              class="chip"
+              [class.chip-active]="isCurrencyActive(c.code)"
+              (click)="toggleCurrency(c.code)"
+              [title]="c.name">
+              {{ c.flag }} {{ c.code }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="currency-grid">
+        @for (c of visibleCurrencies(); track c.code) {
+          <div class="currency-card">
+            <div class="currency-flag">{{ c.flag }}</div>
+            <div class="currency-info">
+              <span class="currency-code">{{ c.code }}</span>
+              <span class="currency-name">{{ c.name }}</span>
+            </div>
+            <div class="currency-rate">
+              <span class="rate-value">{{ formatRate(c.rateUsd, c.code) }}</span>
+              <span class="rate-label">per $1 USD</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ── Precious Metals ───────────────────────────────── -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="material-icons">diamond</span>
+        Precious Metals
+      </h2>
+      <div class="metals-grid">
+        @for (metal of d.metals; track metal.name) {
+          <div class="metal-card">
+            <div class="metal-header">
+              <span class="metal-name">{{ metal.name }}</span>
+              <span class="metal-unit">{{ metal.unit }}</span>
+            </div>
+            <div class="metal-price-usd">{{ formatUsd(metal.priceUsd) }}</div>
+            <div class="metal-divider"></div>
+            <div class="metal-nep">
+              <div class="nepal-row">
+                <span class="nepal-label">NPR / troy oz</span>
+                <span class="nepal-value">{{ formatNpr(metal.priceNpr) }}</span>
+              </div>
+              <div class="nepal-row tola-row">
+                <span class="nepal-label">NPR / Tola 🇳🇵</span>
+                <span class="nepal-value tola">{{ formatNpr(metal.priceTolaNpr) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ── Top Cryptocurrencies ──────────────────────────── -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="material-icons">currency_bitcoin</span>
+        Top Cryptocurrencies
+      </h2>
+      <div class="crypto-grid">
+        @for (crypto of d.cryptos; track crypto.id) {
+          <div class="crypto-card">
+            <img [src]="crypto.imageUrl" [alt]="crypto.name" class="crypto-img">
+            <div class="crypto-info">
+              <span class="crypto-name">{{ crypto.name }}</span>
+              <span class="crypto-symbol">{{ crypto.symbol }}</span>
+            </div>
+            <div class="crypto-prices">
+              <span class="crypto-usd">{{ formatUsd(crypto.priceUsd) }}</span>
+              <span class="crypto-change" [class]="changeClass(crypto.change24h)">
+                {{ changeSign(crypto.change24h) }}{{ crypto.change24h | number:'1.2-2' }}%
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+  }
+</div>

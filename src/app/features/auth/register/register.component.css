@@ -1,0 +1,10 @@
+/* Register uses the same styles as login — import shared auth styles */
+@import url('../login/login.component.css');
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.login-card { max-width: 480px; }

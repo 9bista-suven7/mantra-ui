@@ -1,0 +1,118 @@
+/* ── Host ───────────────────────────────────────────────────── */
+:host {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ── Outer wrap ─────────────────────────────────────────────── */
+.market-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* ── Badge ──────────────────────────────────────────────────── */
+.market-badge {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #1a2a4a, #1e3a6e);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: #93c5fd;
+}
+
+.market-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.badge-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+
+/* ── Content (fades in/out on cycle) ────────────────────────── */
+.market-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.market-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Index name ─────────────────────────────────────────────── */
+.idx-name {
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Price ──────────────────────────────────────────────────── */
+.idx-price {
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Change indicator ───────────────────────────────────────── */
+.idx-change {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  flex-shrink: 0;
+}
+
+.idx-change.up   { color: #4ade80; }
+.idx-change.down { color: #f87171; }
+
+.arrow-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.change-pct {
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Light-mode overrides ───────────────────────────────────── */
+:host-context(html.light-mode) .market-badge {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+}
+
+:host-context(html.light-mode) .idx-price {
+  color: #1e293b;
+}
+
+:host-context(html.light-mode) .idx-name {
+  color: #64748b;
+}

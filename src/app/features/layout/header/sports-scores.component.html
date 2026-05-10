@@ -1,0 +1,24 @@
+@if (current(); as game) {
+  <div class="scores-wrap">
+
+    <!-- Sport / League badge -->
+    <span class="scores-label">
+      <span class="material-icons sport-icon">{{ sportIcon() }}</span>
+      <span class="label-league">{{ game.league }}</span>
+    </span>
+
+    <!-- Scrolling match info -->
+    <div class="scores-content" [class.visible]="visible()">
+      @if (isLive()) {
+        <span class="live-dot" title="Live"></span>
+      }
+      <span class="abbr">{{ game.abbr1 }}</span>
+      <span class="score" [class.leading]="game.score1 > game.score2">{{ game.score1 }}</span>
+      <span class="sep">–</span>
+      <span class="score" [class.leading]="game.score2 > game.score1">{{ game.score2 }}</span>
+      <span class="abbr">{{ game.abbr2 }}</span>
+      <span class="status-badge" [class.live-status]="isLive()">{{ game.status }}</span>
+    </div>
+
+  </div>
+}

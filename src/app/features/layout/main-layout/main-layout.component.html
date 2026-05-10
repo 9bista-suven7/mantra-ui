@@ -1,0 +1,36 @@
+<div class="layout-shell">
+  <app-sidebar />
+  <div class="layout-main">
+    <app-header />
+    <main class="layout-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+
+<!-- ── Inactivity warning overlay ─────────────────────────────── -->
+@if (inactivity.isWarning()) {
+  <div class="idle-backdrop" role="dialog" aria-modal="true" aria-labelledby="idle-title">
+    <div class="idle-card">
+      <div class="idle-icon-wrap">
+        <span class="material-icons idle-icon">lock_clock</span>
+      </div>
+      <h2 class="idle-title" id="idle-title">Session Expiring</h2>
+      <p class="idle-body">
+        You've been inactive for a while.<br>
+        You will be signed out in
+      </p>
+      <div class="idle-countdown">{{ inactivity.countdown() }}</div>
+      <p class="idle-unit">seconds</p>
+      <div class="idle-actions">
+        <button class="idle-btn-stay" (click)="inactivity.extendSession()">
+          <span class="material-icons">refresh</span>
+          Stay Signed In
+        </button>
+        <button class="idle-btn-logout" (click)="signOutNow()">
+          Sign Out Now
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,120 @@
+<aside class="sidebar">
+
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <span class="material-symbols-rounded brand-icon-bare"
+          [style.color]="brandIconColor()">self_improvement</span>
+    <span class="brand-name gradient-text">Mantra</span>
+    <span class="brand-time">{{ currentTime() }}</span>
+  </div>
+
+  <!-- User pill — click to open profile card -->
+  @if (auth.currentUser(); as user) {
+    <div class="user-pill-wrap" (click)="$event.stopPropagation()">
+
+      <button class="user-pill" (click)="toggleProfileCard($event)" title="View profile">
+        <div class="avatar" [style.background]="user.avatarColor">
+          @if (profile.avatarDataUrl()) {
+            <img class="avatar-img" [src]="profile.avatarDataUrl()" alt="avatar" />
+          } @else {
+            {{ user.displayName.charAt(0).toUpperCase() }}
+          }
+        </div>
+        <div class="user-info truncate">
+          <p class="user-name truncate">{{ user.displayName }}</p>
+          <p class="user-email truncate">{{ user.email }}</p>
+        </div>
+        <span class="material-symbols-rounded pill-caret">
+          {{ showProfileCard() ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+
+      @if (showProfileCard()) {
+        <div class="profile-panel" (click)="$event.stopPropagation()">
+
+          <!-- Avatar with camera upload button -->
+          <div class="pp-avatar-wrap">
+            <div class="pp-avatar" [style.background]="user.avatarColor">
+              @if (profile.avatarDataUrl()) {
+                <img class="pp-avatar-img" [src]="profile.avatarDataUrl()" alt="" />
+              } @else {
+                {{ user.displayName.charAt(0).toUpperCase() }}
+              }
+            </div>
+            <button class="pp-camera" (click)="triggerAvatarUpload($event)" title="Change photo">
+              <span class="material-icons">photo_camera</span>
+            </button>
+            <input #avatarFileInput type="file" accept="image/*" style="display:none"
+                   (change)="onAvatarFileSelected($event)" />
+          </div>
+
+          <p class="pp-name">{{ user.displayName }}</p>
+          <p class="pp-handle">&#64;{{ user.username }}</p>
+
+          <div class="pp-divider"></div>
+
+          <div class="pp-info">
+            <div class="pp-row">
+              <span class="material-icons pp-icon">email</span>
+              <span class="pp-val">{{ user.email }}</span>
+            </div>
+            @if (profile.ext().phone) {
+              <div class="pp-row">
+                <span class="material-icons pp-icon">phone</span>
+                <span class="pp-val">{{ profile.ext().phone }}</span>
+              </div>
+            }
+            @if (profile.ext().location) {
+              <div class="pp-row">
+                <span class="material-icons pp-icon">location_on</span>
+                <span class="pp-val">{{ profile.ext().location }}</span>
+              </div>
+            }
+            @if (profile.ext().bio) {
+              <div class="pp-row">
+                <span class="material-icons pp-icon">info</span>
+                <span class="pp-val pp-bio">{{ profile.ext().bio }}</span>
+              </div>
+            }
+          </div>
+
+          <a class="pp-edit-link" routerLink="/app/settings" (click)="showProfileCard.set(false)">
+            <span class="material-icons">tune</span>
+            Edit Profile
+          </a>
+
+        </div>
+      }
+
+    </div>
+  }
+
+  <div class="sidebar-divider"></div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="nav-item--active"
+        class="nav-item"
+      >
+        <span class="nav-icon material-symbols-rounded">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        @if (item.badge) {
+          <span class="nav-badge">{{ item.badge }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Bottom actions -->
+  <div class="sidebar-bottom">
+    <div class="sidebar-divider"></div>
+    <button class="nav-item logout-btn" (click)="logout()">
+      <span class="nav-icon material-symbols-rounded">logout</span>
+      <span class="nav-label">Sign Out</span>
+    </button>
+  </div>
+
+</aside>

@@ -1,0 +1,109 @@
+/* ── Host ───────────────────────────────────────────────────── */
+:host {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ── Outer wrap ─────────────────────────────────────────────── */
+.weather-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* ── Badge ──────────────────────────────────────────────────── */
+.weather-badge {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0f3d2b, #145233);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: #6ee7b7;
+}
+
+.weather-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.badge-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+
+/* ── Content (fades in/out on cycle) ────────────────────────── */
+.weather-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.weather-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── City name ──────────────────────────────────────────────── */
+.city-name {
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+/* ── Temperature ────────────────────────────────────────────── */
+.temp-value {
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Condition ──────────────────────────────────────────────── */
+.condition-label {
+  font-size: 0.58rem;
+  font-weight: 500;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Light-mode overrides ───────────────────────────────────── */
+:host-context(html.light-mode) .weather-badge {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+}
+
+:host-context(html.light-mode) .city-name,
+:host-context(html.light-mode) .condition-label {
+  color: var(--text-secondary);
+}
+
+:host-context(html.light-mode) .temp-value {
+  color: var(--text-primary);
+}

@@ -1,0 +1,454 @@
+<div class="settings-page">
+
+  <!-- ── Page header ──────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-icon-wrap">
+      <span class="material-icons header-icon">tune</span>
+    </div>
+    <div>
+      <h1>Settings</h1>
+      <p>Manage your profile, preferences, and security</p>
+    </div>
+  </div>
+
+  <!-- ── Section nav (anchors) ─────────────────────── -->
+  <nav class="section-nav" aria-label="Settings sections">
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-profile')"><span class="material-icons">person</span>Profile</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-appearance')"><span class="material-icons">palette</span>Appearance</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-notifications')"><span class="material-icons">notifications</span>Notifications</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-preferences')"><span class="material-icons">tune</span>Preferences</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-security')"><span class="material-icons">lock</span>Security</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-about')"><span class="material-icons">info</span>About</button>
+    <button type="button" class="nav-pill" (click)="scrollToSection('sec-danger')"><span class="material-icons">warning</span>Danger</button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1 — PROFILE
+  ═══════════════════════════════════════════════════════ -->
+  <section id="sec-profile" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">person</span></div>
+      <h2>Profile</h2>
+    </div>
+
+    @if (auth.currentUser(); as user) {
+      <div class="profile-row">
+        <!-- Avatar with upload -->
+        <div class="avatar-wrap">
+          <div class="avatar-circle" [style.background]="user.avatarColor">
+            @if (profile.avatarDataUrl()) {
+              <img class="avatar-photo" [src]="profile.avatarDataUrl()" alt="profile photo" />
+            } @else {
+              {{ user.displayName.charAt(0).toUpperCase() }}
+            }
+          </div>
+          <button class="avatar-upload-btn" (click)="triggerAvatarUpload()" title="Change photo">
+            <span class="material-icons">photo_camera</span>
+          </button>
+          <input #settingsAvatarInput type="file" accept="image/*" style="display:none"
+                 (change)="onAvatarSelected($event)" />
+        </div>
+
+        <!-- Info -->
+        <div class="profile-info">
+          <!-- Display name -->
+          <div class="field-group">
+            <span class="field-label">Display Name</span>
+            @if (!editingDisplayName()) {
+              <div class="field-value-row">
+                <span class="field-value">{{ user.displayName }}</span>
+                <button class="icon-btn" (click)="startEditName()" title="Edit">
+                  <span class="material-icons">edit</span>
+                </button>
+              </div>
+            } @else {
+              <div class="inline-edit">
+                <input
+                  class="text-input"
+                  type="text"
+                  placeholder="Your name"
+                  [ngModel]="displayNameInput()"
+                  (ngModelChange)="displayNameInput.set($event)"
+                  (keyup.enter)="saveDisplayName()"
+                  (keyup.escape)="cancelEditName()"
+                />
+                <button class="save-btn" (click)="saveDisplayName()">Save</button>
+                <button class="cancel-btn" (click)="cancelEditName()">Cancel</button>
+              </div>
+            }
+            @if (profileSaved()) {
+              <span class="success-note">
+                <span class="material-icons">check_circle</span>
+                Name updated — reload to see changes in sidebar.
+              </span>
+            }
+          </div>
+
+          <!-- Email (read-only) -->
+          <div class="field-group">
+            <span class="field-label">Email</span>
+            <div class="field-value-row">
+              <span class="field-value muted">{{ user.email }}</span>
+              <span class="badge">Read-only</span>
+            </div>
+          </div>
+
+          <!-- Username -->
+          <div class="field-group">
+            <span class="field-label">Username</span>
+            <div class="field-value-row">
+              <span class="field-value muted">{{ user.username }}</span>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="field-group">
+            <span class="field-label">Phone</span>
+            <div class="inline-edit">
+              <input
+                class="text-input"
+                type="tel"
+                placeholder="e.g. +1 555 0100"
+                [ngModel]="phoneInput()"
+                (ngModelChange)="phoneInput.set($event)"
+              />
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="field-group">
+            <span class="field-label">Location</span>
+            <div class="inline-edit">
+              <input
+                class="text-input"
+                type="text"
+                placeholder="e.g. New York, USA"
+                [ngModel]="locationInput()"
+                (ngModelChange)="locationInput.set($event)"
+              />
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="field-group">
+            <span class="field-label">Bio</span>
+            <div class="inline-edit">
+              <input
+                class="text-input"
+                type="text"
+                placeholder="A short bio…"
+                maxlength="120"
+                [ngModel]="bioInput()"
+                (ngModelChange)="bioInput.set($event)"
+              />
+            </div>
+          </div>
+
+          <!-- Birth date -->
+          <div class="field-group">
+            <span class="field-label">Birth Date</span>
+            <div class="inline-edit">
+              <input
+                class="text-input"
+                type="date"
+                [ngModel]="dobInput()"
+                (ngModelChange)="dobInput.set($event)"
+              />
+            </div>
+          </div>
+
+          <!-- Save extended profile -->
+          <div class="field-group">
+            <div class="field-value-row">
+              <button class="save-btn" (click)="saveExtProfile()">Save Profile Info</button>
+              @if (extSaved()) {
+                <span class="success-note">
+                  <span class="material-icons">check_circle</span> Saved!
+                </span>
+              }
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 2 — APPEARANCE
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-appearance" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">palette</span></div>
+      <h2>Appearance</h2>
+    </div>
+
+    <!-- Accent color -->
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Accent Color</span>
+        <span class="setting-desc">Primary highlight color used across the app</span>
+      </div>
+      <div class="color-swatches">
+        @for (c of accentColors; track c.hex) {
+          <button
+            class="swatch"
+            [title]="c.name"
+            [style.background]="c.hex"
+            [class.swatch--active]="prefs().accentColor === c.hex"
+            (click)="setPref('accentColor', c.hex)"
+          >
+            @if (prefs().accentColor === c.hex) {
+              <span class="material-icons swatch-check">check</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Animations -->
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Animations</span>
+        <span class="setting-desc">Icon and transition animations throughout the UI</span>
+      </div>
+      <label class="toggle" [title]="prefs().animationsEnabled ? 'Disable' : 'Enable'">
+        <input
+          type="checkbox"
+          [ngModel]="prefs().animationsEnabled"
+          (ngModelChange)="setPref('animationsEnabled', $event)"
+        />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 3 — NOTIFICATIONS
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-notifications" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">notifications</span></div>
+      <h2>Notifications</h2>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Reminders</span>
+        <span class="setting-desc">Alert when a reminder is due</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox"
+          [ngModel]="prefs().notifyReminders"
+          (ngModelChange)="setPref('notifyReminders', $event)" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Bill Due Dates</span>
+        <span class="setting-desc">Remind me 3 days before a bill is due</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox"
+          [ngModel]="prefs().notifyBills"
+          (ngModelChange)="setPref('notifyBills', $event)" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Market Alerts</span>
+        <span class="setting-desc">Notify on significant price movements</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox"
+          [ngModel]="prefs().notifyMarket"
+          (ngModelChange)="setPref('notifyMarket', $event)" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Chat Messages</span>
+        <span class="setting-desc">Notify on new incoming messages</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox"
+          [ngModel]="prefs().notifyChat"
+          (ngModelChange)="setPref('notifyChat', $event)" />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 4 — PREFERENCES
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-preferences" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">tune</span></div>
+      <h2>Preferences</h2>
+    </div>
+
+    <!-- Default landing page -->
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Default Page</span>
+        <span class="setting-desc">Which page opens after login</span>
+      </div>
+      <select class="select-input"
+        [ngModel]="prefs().defaultPage"
+        (ngModelChange)="setPref('defaultPage', $event)">
+        @for (p of pages; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Currency -->
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Currency</span>
+        <span class="setting-desc">Used in Bills and Splitwise displays</span>
+      </div>
+      <select class="select-input"
+        [ngModel]="prefs().currency"
+        (ngModelChange)="setPref('currency', $event)">
+        @for (c of currencies; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Date format -->
+    <div class="setting-row">
+      <div class="setting-meta">
+        <span class="setting-name">Date Format</span>
+        <span class="setting-desc">How dates are displayed throughout the app</span>
+      </div>
+      <select class="select-input"
+        [ngModel]="prefs().dateFormat"
+        (ngModelChange)="setPref('dateFormat', $event)">
+        @for (f of dateFormats; track f) {
+          <option [value]="f">{{ f }}</option>
+        }
+      </select>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 5 — SECURITY
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-security" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">lock</span></div>
+      <h2>Security</h2>
+    </div>
+
+    <div class="security-form">
+      <div class="field-group">
+        <label class="field-label" for="oldPwd">Current Password</label>
+        <input id="oldPwd" class="text-input" type="password" placeholder="••••••••"
+          [ngModel]="oldPassword()" (ngModelChange)="oldPassword.set($event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="newPwd">New Password</label>
+        <input id="newPwd" class="text-input" type="password" placeholder="Min 8 characters"
+          [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="confirmPwd">Confirm New Password</label>
+        <input id="confirmPwd" class="text-input" type="password" placeholder="Repeat new password"
+          [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
+      </div>
+
+      @if (passwordError()) {
+        <p class="error-msg">
+          <span class="material-icons">error_outline</span>
+          {{ passwordError() }}
+        </p>
+      }
+      @if (passwordSuccess()) {
+        <p class="success-msg">
+          <span class="material-icons">check_circle</span>
+          Password changed successfully.
+        </p>
+      }
+
+      <button class="primary-btn" (click)="changePassword()">
+        <span class="material-icons">lock_reset</span>
+        Update Password
+      </button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 6 — ABOUT
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-about" class="settings-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon">info</span></div>
+      <h2>About</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-item">
+        <span class="about-key">App</span>
+        <span class="about-val">Mantra</span>
+      </div>
+      <div class="about-item">
+        <span class="about-key">Version</span>
+        <span class="about-val">1.0.0</span>
+      </div>
+      <div class="about-item">
+        <span class="about-key">Frontend</span>
+        <span class="about-val">Angular 20 · Zoneless · Signals</span>
+      </div>
+      <div class="about-item">
+        <span class="about-key">Backend</span>
+        <span class="about-val">Spring Boot 4 · WebFlux · MongoDB</span>
+      </div>
+      <div class="about-item">
+        <span class="about-key">Build</span>
+        <span class="about-val">April 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SECTION 7 — DANGER ZONE
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sec-danger" class="settings-card danger-card">
+    <div class="card-header">
+      <div class="section-icon-wrap"><span class="material-icons section-icon danger-icon">warning</span></div>
+      <h2>Danger Zone</h2>
+    </div>
+
+    <div class="danger-row">
+      <div class="setting-meta">
+        <span class="setting-name">Clear Local Data</span>
+        <span class="setting-desc">Reset all app preferences and cached data (keeps your account)</span>
+      </div>
+      <button class="danger-btn" (click)="clearLocalData()">
+        <span class="material-icons">delete_sweep</span>
+        Clear Data
+      </button>
+    </div>
+
+    <div class="danger-row">
+      <div class="setting-meta">
+        <span class="setting-name">Delete Account</span>
+        <span class="setting-desc">Permanently delete your account and all associated data</span>
+      </div>
+      <button class="danger-btn danger-btn--hard" (click)="confirmDeleteAccount()">
+        <span class="material-icons">person_remove</span>
+        Delete Account
+      </button>
+    </div>
+  </section>
+
+</div>

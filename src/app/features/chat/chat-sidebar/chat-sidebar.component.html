@@ -1,0 +1,328 @@
+<div class="sidebar">
+
+  <!-- Header -->
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">
+      Chats
+      @if (totalUnread() > 0) {
+        <span class="global-badge">{{ totalUnread() }}</span>
+      }
+    </h2>
+    <div class="header-actions">
+      <div class="connection-dot" [class.online]="wsConnected$ | async" title="WebSocket"></div>
+
+      <!-- New-action dropdown -->
+      <div class="action-menu-wrap" [class.open]="showActionMenu()">
+        <button class="icon-btn action-trigger" (click)="$event.stopPropagation(); toggleActionMenu()" title="New">
+          <span class="material-icons">add</span>
+        </button>
+        @if (showActionMenu()) {
+          <div class="action-dropdown" (click)="$event.stopPropagation()">
+            <button class="action-item" (click)="openNewDm(); showActionMenu.set(false)">
+              <span class="material-icons">person_search</span>
+              Add Person
+            </button>
+            <button class="action-item" (click)="openNewGroup(); showActionMenu.set(false)">
+              <span class="material-icons">group_add</span>
+              Create Group
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="material-icons search-icon">search</span>
+    <input
+      type="text"
+      placeholder="Search..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+      class="search-input" />
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'direct'" (click)="setTab('direct')">
+      Direct
+      @if (conversations().length > 0) {
+        <span class="tab-count">{{ conversations().length }}</span>
+      }
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'groups'" (click)="setTab('groups')">
+      Groups
+      @if (groupsTabCount() > 0) {
+        <span class="tab-count">{{ groupsTabCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <!-- Conversation List -->
+  <div class="list-container">
+    @if (activeTab() === 'direct') {
+      @for (conv of filteredConversations(); track conv.id) {
+        <div class="chat-item-row" [class.selected]="selectedId() === conv.id">
+          <button
+            class="chat-item"
+            [class.selected]="selectedId() === conv.id"
+            (click)="selectConversation(conv)">
+
+            <div class="avatar-wrap">
+              @if (conv.otherUser.avatarUrl) {
+                <img class="avatar" [src]="conv.otherUser.avatarUrl" [alt]="conv.otherUser.displayName" />
+              } @else {
+                <div class="avatar avatar-initials">{{ avatarInitials(conv.otherUser.displayName) }}</div>
+              }
+              <span class="presence-dot" [class.online]="conv.otherUserOnline"></span>
+            </div>
+
+            <div class="item-info">
+              <div class="item-top">
+                <span class="item-name">{{ conv.otherUser.displayName }}</span>
+                <span class="item-time">{{ formatTime(conv.lastMessage?.sentAt) }}</span>
+              </div>
+              <div class="item-bottom">
+                <span class="item-preview">
+                  @if (conv.lastMessage?.type === 'IMAGE') { 📷 Photo }
+                  @else if (conv.lastMessage?.type === 'FILE') { 📎 File }
+                  @else { {{ conv.lastMessage?.content | slice:0:40 }} }
+                </span>
+                @if (conv.unreadCount > 0) {
+                  <span class="unread-badge">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</span>
+                }
+              </div>
+            </div>
+          </button>
+        </div>
+      }
+      @if (filteredConversations().length === 0) {
+        <div class="empty-list">
+          <span class="material-icons empty-icon-sm">chat</span>
+          <p>No conversations yet</p>
+          <button class="btn-new" (click)="openNewDm()">
+            <span class="material-icons">person_search</span> Start a chat
+          </button>
+        </div>
+      }
+    }
+
+    @if (activeTab() === 'groups') {
+      <!-- ── My Groups subsection ── -->
+      <div class="list-section-header">
+        <span class="material-icons">group</span>
+        <span>My Groups</span>
+        <span class="list-section-count">{{ filteredGroups().length }}</span>
+      </div>
+      @for (group of filteredGroups(); track group.id) {
+        <div class="chat-item-row" [class.selected]="selectedId() === group.id">
+          <button
+            class="chat-item"
+            [class.selected]="selectedId() === group.id"
+            (click)="selectGroup(group)">
+
+            <div class="avatar-wrap">
+              @if (group.avatarUrl) {
+                <img class="avatar" [src]="group.avatarUrl" [alt]="group.name" />
+              } @else {
+                <div class="avatar avatar-initials group-avatar">{{ avatarInitials(group.name) }}</div>
+              }
+              <span class="member-count-badge">{{ group.members.length }}</span>
+            </div>
+
+            <div class="item-info">
+              <div class="item-top">
+                <span class="item-name">{{ group.name }}</span>
+                <span class="item-time">{{ formatTime(group.lastMessage?.sentAt) }}</span>
+              </div>
+              <div class="item-bottom">
+                <span class="item-preview">
+                  @if (group.lastMessage?.type === 'IMAGE') { 📷 Photo }
+                  @else if (group.lastMessage?.type === 'FILE') { 📎 File }
+                  @else { {{ group.lastMessage?.content | slice:0:40 }} }
+                </span>
+                @if (group.unreadCount > 0) {
+                  <span class="unread-badge">{{ group.unreadCount > 99 ? '99+' : group.unreadCount }}</span>
+                }
+              </div>
+            </div>
+          </button>
+        </div>
+      }
+      @if (filteredGroups().length === 0) {
+        <div class="empty-list empty-list-compact">
+          <span class="material-icons empty-icon-sm">group</span>
+          <p>No groups yet</p>
+          <button class="btn-new" (click)="openNewGroup()">
+            <span class="material-icons">group_add</span> Create a group
+          </button>
+        </div>
+      }
+
+      <!-- ── Splitwise subsection ── -->
+      <div class="list-section-header splitwise-header">
+        <span class="splitwise-emoji">💰</span>
+        <span>Splitwise Groups</span>
+        <span class="list-section-count">{{ filteredExpenseGroups().length }}</span>
+      </div>
+      @if (loadingExpenseGroups()) {
+        <div class="splitwise-loading"><span class="spinner-sm"></span> Loading…</div>
+      } @else if (filteredExpenseGroups().length === 0) {
+        <div class="empty-list empty-list-compact">
+          <span class="material-icons empty-icon-sm">payments</span>
+          <p>No Splitwise groups</p>
+          <a class="btn-new" routerLink="/app/expenses">
+            <span class="material-icons">open_in_new</span> Open Splitwise
+          </a>
+        </div>
+      } @else {
+        @for (eg of filteredExpenseGroups(); track eg.id) {
+          <button class="chat-item splitwise-item" (click)="selectExpenseGroup(eg)">
+            <div class="avatar-wrap">
+              <div class="avatar avatar-initials splitwise-avatar">{{ eg.emoji || '💰' }}</div>
+              <span class="member-count-badge">{{ eg.memberIds.length }}</span>
+            </div>
+            <div class="item-info">
+              <div class="item-top">
+                <span class="item-name">{{ eg.name }}</span>
+                <span class="splitwise-tag">Splitwise</span>
+              </div>
+              <div class="item-bottom">
+                <span class="item-preview">
+                  @if (eg.description) { {{ eg.description | slice:0:40 }} }
+                  @else { {{ eg.category }} · {{ eg.memberIds.length }} member{{ eg.memberIds.length !== 1 ? 's' : '' }} }
+                </span>
+                @if (expenseGroupUnread(eg) > 0) {
+                  <span class="unread-badge">{{ expenseGroupUnread(eg) > 99 ? '99+' : expenseGroupUnread(eg) }}</span>
+                }
+              </div>
+            </div>
+          </button>
+        }
+      }
+    }
+  </div>
+</div>
+
+<!-- ── New DM Modal ─────────────────────────────────────────────────────── -->
+@if (showNewDm()) {
+  <div class="modal-overlay" (click)="showNewDm.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">New Message</span>
+        <button class="icon-btn" (click)="showNewDm.set(false)">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="modal-search">
+        <span class="material-icons search-icon">search</span>
+        <input
+          class="search-input"
+          placeholder="Search by name or email..."
+          [ngModel]="dmQuery()"
+          (ngModelChange)="onDmQueryChange($event)"
+          autocomplete="off" />
+        @if (dmSearching()) { <span class="spinner-sm"></span> }
+      </div>
+
+      <div class="modal-list">
+        @if (dmQuery().length < 2) {
+          <p class="hint-text">Type at least 2 characters to search</p>
+        } @else if (!dmSearching() && dmResults().length === 0) {
+          <p class="hint-text">No users found</p>
+        }
+        @for (user of dmResults(); track user.id) {
+          <button class="user-row" (click)="startDm(user)" [disabled]="dmStarting()">
+            <div class="user-avatar" [style.background]="user.avatarColor || '#6C63FF'">
+              {{ avatarInitials(user.displayName) }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ user.displayName }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── New Group Modal ──────────────────────────────────────────────────── -->
+@if (showNewGroup()) {
+  <div class="modal-overlay" (click)="showNewGroup.set(false)">
+    <div class="modal-card modal-card--wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">New Group</span>
+        <button class="icon-btn" (click)="showNewGroup.set(false)">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="field-row">
+        <span class="material-icons field-icon">group</span>
+        <input
+          class="search-input"
+          placeholder="Group name *"
+          [ngModel]="groupName()"
+          (ngModelChange)="groupName.set($event)" />
+      </div>
+
+      <div class="modal-search" style="margin-top: 0.75rem;">
+        <span class="material-icons search-icon">person_add</span>
+        <input
+          class="search-input"
+          placeholder="Search people to add..."
+          [ngModel]="groupQuery()"
+          (ngModelChange)="onGroupQueryChange($event)"
+          autocomplete="off" />
+        @if (groupSearching()) { <span class="spinner-sm"></span> }
+      </div>
+
+      @if (selectedMembers().length > 0) {
+        <div class="chips-row">
+          @for (m of selectedMembers(); track m.id) {
+            <span class="chip">{{ m.displayName }}<button class="chip-remove" (click)="toggleMember(m)">×</button></span>
+          }
+        </div>
+      }
+
+      <div class="modal-list">
+        @if (groupQuery().length < 2 && selectedMembers().length === 0) {
+          <p class="hint-text">Search people to add to the group</p>
+        } @else if (!groupSearching() && groupQuery().length >= 2 && groupSearchResults().length === 0) {
+          <p class="hint-text">No users found</p>
+        }
+        @for (user of groupSearchResults(); track user.id) {
+          <button class="user-row" [class.user-row--selected]="isMemberSelected(user.id)" (click)="toggleMember(user)">
+            <div class="user-avatar" [style.background]="user.avatarColor || '#FF6584'">
+              {{ avatarInitials(user.displayName) }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ user.displayName }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            @if (isMemberSelected(user.id)) {
+              <span class="material-icons check-icon">check_circle</span>
+            }
+          </button>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn-create"
+          [disabled]="!groupName().trim() || selectedMembers().length === 0 || creatingGroup()"
+          (click)="createGroup()">
+          @if (creatingGroup()) {
+            <span class="spinner-sm"></span> Creating...
+          } @else {
+            <span class="material-icons">group_add</span>
+            Create Group ({{ selectedMembers().length }} member{{ selectedMembers().length !== 1 ? 's' : '' }})
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

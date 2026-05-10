@@ -1,0 +1,73 @@
+<section class="weather-page">
+  <div class="page-head">
+    <a routerLink="/app/dashboard" class="back-link">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Dashboard
+    </a>
+    <h1>Weather</h1>
+    <button class="btn-icon" (click)="reload()" title="Reload">
+      <span class="material-symbols-rounded">refresh</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="weather-skeleton glass-card">Loading weather…</div>
+  } @else if (error() || !weather()) {
+    <div class="weather-empty glass-card">
+      <span class="material-symbols-rounded">cloud_off</span>
+      <p>Weather unavailable. Please try again later.</p>
+    </div>
+  } @else if (weather(); as w) {
+    <!-- Hero -->
+    <div class="hero-card glass-card">
+      <div class="hero-main">
+        <span class="hero-emoji">{{ w.emoji }}</span>
+        <div class="hero-temp-stack">
+          <span class="hero-temp">{{ w.temp }}°C</span>
+          <span class="hero-label">{{ w.label }}</span>
+          <span class="hero-loc">
+            <span class="material-symbols-rounded">location_on</span>
+            {{ w.city }}{{ w.country ? ', ' + w.country : '' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-pills">
+        <div class="pill">
+          <span class="material-symbols-rounded" style="color:#00D9FF">air</span>
+          <div><span class="pill-val">{{ w.windSpeed }}</span><span class="pill-unit"> km/h</span></div>
+          <span class="pill-label">Wind</span>
+        </div>
+        <div class="pill">
+          <span class="material-symbols-rounded" style="color:#6C63FF">water_drop</span>
+          <div><span class="pill-val">{{ w.humidity }}</span><span class="pill-unit"> %</span></div>
+          <span class="pill-label">Humidity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-day forecast -->
+    @if (w.daily?.length) {
+      <h2 class="section-title">7-Day Forecast</h2>
+      <div class="forecast-grid">
+        @for (d of w.daily; track d.date) {
+          <div class="fc-card glass-card">
+            <span class="fc-day">{{ forecastDayLabel(d.date) }}</span>
+            <span class="fc-emoji" [title]="d.label">{{ d.emoji }}</span>
+            <span class="fc-temps">
+              <span class="fc-max">{{ d.max }}°</span>
+              <span class="fc-min">{{ d.min }}°</span>
+            </span>
+            <span class="fc-label">{{ d.label }}</span>
+            @if (d.sunrise && d.sunset) {
+              <div class="fc-sun">
+                <span><span class="material-symbols-rounded">wb_sunny</span> {{ formatTime(d.sunrise) }}</span>
+                <span><span class="material-symbols-rounded">bedtime</span> {{ formatTime(d.sunset) }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</section>
