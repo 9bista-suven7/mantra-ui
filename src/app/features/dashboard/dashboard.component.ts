@@ -86,12 +86,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
           { label: 'Unpaid Bills',       value: data.bills.length,     icon: 'receipt_long',   color: '#FF6584', route: '/app/bills' },
           { label: 'Expense Groups',     value: data.groups.length,    icon: 'group',           color: '#4ECCA3', route: '/app/splitwise' },
         ]);
+        this.upcomingReminders.set((data.reminders ?? []).slice(0, 5));
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
 
-    this.loadUpcomingReminders();
     this.loadDiscover();
     this.convertCurrency();
   }

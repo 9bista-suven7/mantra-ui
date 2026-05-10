@@ -84,6 +84,21 @@
   .aurora, .grid-overlay, .floater, .orb { animation: none !important; }
 }
 
+/* Mobile perf: disable the heaviest background effects on small screens. */
+@media (max-width: 768px) {
+  .aurora,
+  .grid-overlay,
+  .floaters {
+    display: none;
+  }
+
+  .orb {
+    animation: none !important;
+    filter: blur(44px);
+    opacity: 0.12;
+  }
+}
+
 /* Layout */
 .landing-wrap {
   position: relative; z-index: 1;

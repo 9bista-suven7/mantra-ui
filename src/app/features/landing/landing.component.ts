@@ -103,8 +103,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.startClock();
     this.loadWeather();
-    this.loadAdvice();
-    this.loadFunFact();
+    this.scheduleNonCriticalContent();
   }
 
   ngOnDestroy(): void {
@@ -115,7 +114,22 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   private startClock(): void {
     this.tick();
-    this.clockInterval = setInterval(() => this.tick(), 1000);
+    const tickMs = this.isConstrainedDevice() ? 3000 : 1000;
+    this.clockInterval = setInterval(() => this.tick(), tickMs);
+  }
+
+  private scheduleNonCriticalContent(): void {
+    const delayMs = this.isConstrainedDevice() ? 1500 : 300;
+    setTimeout(() => {
+      this.loadAdvice();
+      this.loadFunFact();
+    }, delayMs);
+  }
+
+  private isConstrainedDevice(): boolean {
+    const isSmallScreen = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return isSmallScreen || prefersReducedMotion;
   }
 
   private tick(): void {
