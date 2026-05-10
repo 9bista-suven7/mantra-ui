@@ -202,3 +202,24 @@
   color: var(--text-primary);
 }
 :host-context(html.light-mode) .btn-cancel:hover { background: var(--bg-card-hover); }
+
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .chat-root { flex-direction: column; }
+
+  /* Hide the chat contact sidebar on mobile by default;
+     it will be toggled via a button inside the chat UI */
+  .chat-root app-chat-sidebar {
+    position: fixed;
+    top: var(--header-height, 64px);
+    left: 0;
+    bottom: 0;
+    width: 80vw;
+    max-width: 300px;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .chat-main { width: 100%; min-height: 0; }
+}

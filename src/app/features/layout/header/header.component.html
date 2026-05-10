@@ -1,5 +1,9 @@
 <header class="app-header">
   <div class="header-left">
+    <!-- Hamburger: only visible on mobile -->
+    <button class="hamburger-btn" (click)="sidebar.toggle()" aria-label="Toggle navigation">
+      <span class="material-icons">{{ sidebar.isOpen() ? 'close' : 'menu' }}</span>
+    </button>
     <span class="brand-icon material-icons">self_improvement</span>
     <span class="live-date">{{ currentDate() }}</span>
   </div>

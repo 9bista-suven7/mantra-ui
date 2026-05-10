@@ -330,3 +330,20 @@
 }
 
 .error-state .material-icons { font-size: 3rem; }
+
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .market-page { padding: 20px 12px; }
+
+  .page-header { margin-bottom: 20px; }
+  .page-title { font-size: 1.3rem; }
+
+  .section-header-row { gap: 10px; }
+
+  .currency-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metals-grid   { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .crypto-grid   { grid-template-columns: 1fr; }
+  .loading-grid  { grid-template-columns: 1fr 1fr; }
+
+  .currency-chips { gap: 4px; }
+}

@@ -8,6 +8,7 @@ import { NotificationPanelComponent } from './notification-panel.component';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SidebarService } from '../../../core/services/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -22,6 +23,7 @@ export class HeaderComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly theme    = inject(ThemeService);
   protected readonly notifSvc = inject(NotificationService);
+  protected readonly sidebar  = inject(SidebarService);
   private  readonly auth      = inject(AuthService);
 
   readonly currentTime = signal('');

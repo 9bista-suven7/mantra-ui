@@ -362,3 +362,16 @@
 :host-context(html.light-mode) .del-btn { color: var(--text-muted); }
 
 :host-context(html.light-mode) .empty-state { color: var(--text-secondary); }
+
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .todo-page {
+    padding: 20px 12px 40px;
+    gap: 20px;
+    background-attachment: scroll;
+  }
+
+  .panel { padding: 14px 14px 16px; }
+
+  .emoji-grid { grid-template-columns: repeat(6, 1fr); }
+}

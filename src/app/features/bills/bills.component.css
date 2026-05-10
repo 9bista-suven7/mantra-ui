@@ -212,3 +212,40 @@ select.input-field { appearance: none; }
   border-color: #6366f1;
 }
 
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .summary-strip {
+    gap: 16px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .filter-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-tab { white-space: nowrap; flex-shrink: 0; }
+
+  .bill-card {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .bill-amount-col { flex: 1; text-align: left; }
+
+  .field-row { grid-template-columns: 1fr; }
+
+  .modal-actions { flex-direction: column-reverse; }
+  .modal-actions .btn { width: 100%; justify-content: center; }
+}
+

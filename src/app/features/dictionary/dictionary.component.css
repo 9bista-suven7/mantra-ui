@@ -160,3 +160,8 @@
   flex-shrink: 0;
 }
 .word-text { font-size: 0.92rem; font-weight: 600; text-transform: capitalize; }
+
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .word-cards { grid-template-columns: repeat(2, 1fr) !important; }
+}

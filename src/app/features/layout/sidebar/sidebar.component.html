@@ -1,4 +1,9 @@
-<aside class="sidebar">
+<!-- Mobile backdrop overlay -->
+@if (sidebarSvc.isOpen()) {
+  <div class="sidebar-overlay" (click)="sidebarSvc.close()"></div>
+}
+
+<aside class="sidebar" [class.sidebar--open]="sidebarSvc.isOpen()">
 
   <!-- Brand -->
   <div class="sidebar-brand">

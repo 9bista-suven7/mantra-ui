@@ -255,3 +255,39 @@
   border-bottom: 1.5px solid #4caf50;
   box-shadow: 0 2px 12px rgba(76, 175, 80, 0.1);
 }
+
+/* ── Hamburger button (mobile only) ──────────────────────── */
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+.hamburger-btn:hover {
+  background: rgba(108, 99, 255, 0.12);
+  color: var(--primary-light);
+}
+.hamburger-btn .material-icons { font-size: 1.4rem; }
+
+/* ── Mobile responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .hamburger-btn { display: flex; }
+
+  .app-header {
+    padding: 0 12px;
+    gap: 4px;
+  }
+
+  /* Hide the complex center info section on small screens */
+  .header-center { display: none; }
+
+  .live-date { display: none; }
+}

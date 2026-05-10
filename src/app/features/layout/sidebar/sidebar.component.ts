@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService } from '../../../core/services/profile.service';
+import { SidebarService } from '../../../core/services/sidebar.service';
+import { filter } from 'rxjs';
 
 interface NavItem {
   label: string;
@@ -23,7 +25,9 @@ export class SidebarComponent implements OnInit {
 
   protected readonly auth    = inject(AuthService);
   protected readonly profile = inject(ProfileService);
+  protected readonly sidebarSvc = inject(SidebarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   @ViewChild('avatarFileInput') private avatarFileInput!: ElementRef<HTMLInputElement>;
 
@@ -83,9 +87,16 @@ export class SidebarComponent implements OnInit {
     this.clockTimer = setInterval(() => this.tick(), 60_000);
     this.cycleColor();
     this.colorTimer = setInterval(() => this.cycleColor(), 10_000);
+
+    // Close sidebar drawer on mobile when navigating to a new route
+    const sub = this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe(() => this.sidebarSvc.close());
+
     this.destroyRef.onDestroy(() => {
       if (this.clockTimer) clearInterval(this.clockTimer);
       if (this.colorTimer) clearInterval(this.colorTimer);
+      sub.unsubscribe();
     });
   }
 
