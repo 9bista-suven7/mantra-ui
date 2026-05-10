@@ -203,23 +203,63 @@
 }
 :host-context(html.light-mode) .btn-cancel:hover { background: var(--bg-card-hover); }
 
-/* ── Mobile responsive ───────────────────────────────────────── */
-@media (max-width: 640px) {
-  .chat-root { flex-direction: column; }
+/* ── Mobile back button (hidden on desktop) ─────────────────── */
+.mobile-back-btn {
+  display: none;
+}
 
-  /* Hide the chat contact sidebar on mobile by default;
-     it will be toggled via a button inside the chat UI */
-  .chat-root app-chat-sidebar {
-    position: fixed;
-    top: var(--header-height, 64px);
-    left: 0;
-    bottom: 0;
-    width: 80vw;
-    max-width: 300px;
-    z-index: 150;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Both panes take full width — only one is visible at a time */
+  .chat-root {
+    position: relative;
   }
 
-  .chat-main { width: 100%; min-height: 0; }
+  /* Default: sidebar is visible, chat-main is hidden */
+  .chat-root app-chat-sidebar {
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .chat-main {
+    display: none;
+    width: 100%;
+  }
+
+  /* When a conversation is selected: hide sidebar, show chat-main */
+  .chat-root.mobile-selected app-chat-sidebar {
+    display: none;
+  }
+
+  .chat-root.mobile-selected .chat-main {
+    display: flex;
+  }
+
+  /* Back button visible on mobile only */
+  .mobile-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-surface);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--primary-light);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: background var(--transition-fast);
+  }
+
+  .mobile-back-btn:hover {
+    background: rgba(108, 99, 255, 0.08);
+  }
+
+  .mobile-back-btn .material-icons {
+    font-size: 1.2rem;
+  }
 }

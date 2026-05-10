@@ -1,4 +1,4 @@
-<div class="chat-root">
+<div class="chat-root" [class.mobile-selected]="selectedTarget() !== null">
   <app-chat-sidebar
     [conversations]="conversations()"
     [groups]="groups()"
@@ -13,6 +13,12 @@
     (groupDeleteRequested)="onDeleteGroup($event)" />
 
   <div class="chat-main">
+    <!-- Mobile back button: returns to conversation list -->
+    <button class="mobile-back-btn" (click)="selectedTarget.set(null)">
+      <span class="material-icons">arrow_back</span>
+      Conversations
+    </button>
+
     @if (selectedTarget(); as target) {
       <app-chat-window
         [target]="target"
